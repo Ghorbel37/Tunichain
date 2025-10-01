@@ -11,6 +11,8 @@ import ResponsiveDrawer from "./components/ResponsiveDrawer";
 import ProfileMenu from "./components/ProfileMenu";
 import { Outlet } from "react-router-dom";
 import { styled, useTheme } from "@mui/material/styles";
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 
 
 const drawerWidth = 240;
@@ -55,7 +57,7 @@ const AppBar = styled(MuiAppBar, {
 }));
 
 
-export default function App() {
+export default function App({ mode = 'light', setMode }) {
   const theme = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(true);
@@ -66,6 +68,10 @@ export default function App() {
 
   const handleDrawerOpen = () => {
     setDrawerOpen(!drawerOpen);
+  };
+
+  const handleThemeToggle = () => {
+    setMode(mode === 'light' ? 'dark' : 'light');
   };
 
   return (
@@ -93,6 +99,9 @@ export default function App() {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Tunichain App
           </Typography>
+          <IconButton sx={{ ml: 1 }} color="inherit" onClick={handleThemeToggle}>
+            {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+          </IconButton>
           <ProfileMenu />
         </Toolbar>
       </AppBar>
