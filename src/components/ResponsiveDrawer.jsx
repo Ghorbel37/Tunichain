@@ -1,0 +1,84 @@
+import React from "react";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import HomeIcon from "@mui/icons-material/Home";
+import InfoIcon from "@mui/icons-material/Info";
+import PersonIcon from "@mui/icons-material/Person";
+import Divider from "@mui/material/Divider";
+import Box from "@mui/material/Box";
+import { useNavigate, useLocation } from "react-router-dom";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
+import { Toolbar } from "@mui/material";
+
+const navItems = [
+    { text: "Home", icon: <HomeIcon />, path: "/" },
+    { text: "About", icon: <InfoIcon />, path: "/about" },
+    { text: "Profile", icon: <PersonIcon />, path: "/profile" },
+];
+
+export default function ResponsiveDrawer({ drawerWidth, mobileOpen, onMobileToggle, open, onToggle }) {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const drawerContent = (
+        <Box sx={{ width: drawerWidth }}>
+            <Toolbar />
+            <Divider />
+            <List>
+                {navItems.map((item) => (
+                    <ListItem key={item.text} disablePadding>
+                        <ListItemButton
+                            selected={location.pathname === item.path}
+                            onClick={() => navigate(item.path)}
+                        >
+                            <ListItemIcon>{item.icon}</ListItemIcon>
+                            <ListItemText primary={item.text} />
+                        </ListItemButton>
+                    </ListItem>
+                ))}
+            </List>
+        </Box>
+    );
+
+    if (isMobile) {
+        return (
+            <Drawer
+                variant="temporary"
+                open={mobileOpen}
+                onClose={onMobileToggle}
+                ModalProps={{ keepMounted: true }}
+                sx={{
+                    display: { xs: "block", md: "none" },
+                    "& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth },
+                }}
+            >
+                {drawerContent}
+            </Drawer>
+        );
+    }
+
+    return (
+        <Drawer
+            variant="persistent"
+            open={open}
+            sx={{
+                width: drawerWidth,
+                flexShrink: 0,
+                display: { xs: "none", md: "block" },
+                "& .MuiDrawer-paper": {
+                    width: drawerWidth,
+                    boxSizing: "border-box",
+                },
+            }}
+        >
+            {drawerContent}
+        </Drawer>
+    );
+}
