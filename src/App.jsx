@@ -60,7 +60,7 @@ const AppBar = styled(MuiAppBar, {
 export default function App({ mode = 'light', setMode }) {
   const theme = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
