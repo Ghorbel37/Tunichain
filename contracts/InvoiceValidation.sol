@@ -20,7 +20,6 @@ contract InvoiceValidation {
         uint256 id;
         address seller;
         bytes32 invoiceHash; // e.g., keccak256(file)
-        string ipfsCid; // optional pointer to full invoice
         uint256 amount; // in cents
         uint256 timestamp;
     }
@@ -28,22 +27,22 @@ contract InvoiceValidation {
     mapping(uint256 => Invoice) public invoices;
     mapping(bytes32 => uint256) public hashToId;
 
-    event InvoiceStored(uint256 indexed id, address indexed seller, bytes32 hash, string ipfsCid, uint256 amount);
+    event InvoiceStored(uint256 indexed id, address indexed seller, bytes32 hash, uint256 amount);
 
     constructor(address registryAddr) {
         registry = IRegistry(registryAddr);
     }
 
     // Seller submits invoice (could include seller signature for additional proof)
-    function submitInvoice(bytes32 invoiceHash, string calldata ipfsCid, uint256 amount) external returns (uint256) {
+    function submitInvoice(bytes32 invoiceHash, uint256 amount) external returns (uint256) {
         require(registry.isSeller(msg.sender), "not registered seller");
         require(hashToId[invoiceHash] == 0, "already stored");
 
         invoiceCounter++;
-        invoices[invoiceCounter] = Invoice(invoiceCounter, msg.sender, invoiceHash, ipfsCid, amount, block.timestamp);
+        invoices[invoiceCounter] = Invoice(invoiceCounter, msg.sender, invoiceHash, amount, block.timestamp);
         hashToId[invoiceHash] = invoiceCounter;
 
-        emit InvoiceStored(invoiceCounter, msg.sender, invoiceHash, ipfsCid, amount);
+        emit InvoiceStored(invoiceCounter, msg.sender, invoiceHash, amount);
         return invoiceCounter;
     }
 
