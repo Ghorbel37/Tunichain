@@ -5,7 +5,7 @@
 pragma solidity ^0.8.19;
 
 interface IInvoiceMinimal {
-    function invoices(uint256) external view returns (uint256 id, address seller, bytes32 hash, string memory, uint256 amount, uint256 timestamp);
+    function invoices(uint256) external view returns (uint256 id, address seller, bytes32 hash, uint256 amount, uint256 timestamp);
 }
 
 interface IPaymentMinimal {
@@ -31,7 +31,7 @@ contract VATControl {
 
     // Called by a trusted system off-chain or by the InvoiceRegistry when invoice is stored.
     function recordInvoiceTax(uint256 invoiceId) external {
-        ( , address seller, , , uint256 amount, ) = invoiceReg.invoices(invoiceId);
+        ( , address seller, , uint256 amount, ) = invoiceReg.invoices(invoiceId);
         uint256 vat = amount * vatRatePermille / 1000;
         sellerTaxBase[seller] += amount;
         // Do not auto-credit as paid; payments recorded separately.
@@ -41,7 +41,7 @@ contract VATControl {
     // Optionally, call when a payment is recorded (match payment->invoice then mark VAT as paid)
     function recordPayment(uint256 paymentId) external {
         ( , , uint256 invoiceId, , uint256 amountPaid, ) = paymentReg.payments(paymentId);
-        ( , address seller, , , uint256 invoiceAmount, ) = invoiceReg.invoices(invoiceId);
+        ( , address seller, , uint256 invoiceAmount, ) = invoiceReg.invoices(invoiceId);
         uint256 vat = invoiceAmount * vatRatePermille / 1000;
         // business logic: determine how much of amountPaid is VAT portion
         sellerVatPaid[seller] += vat;
