@@ -25,9 +25,23 @@ app.use("/api/payments", paymentRoutes);
 // const swaggerUi = require('swagger-ui-express');
 // const swaggerFile = require('./swagger/swagger-output.json');
 import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from "swagger-jsdoc";
 import swaggerFile from './swagger/swagger-output.json' with { type: 'json' };
+const options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Bank API",
+      version: "1.0.0",
+      description: "API documentation for managing banks",
+    },
+    servers: [{ url: "http://localhost:4000" }],
+  },
+  apis: ["./routes/*.js"], // path to your annotated route files
+};
 
+const specs = swaggerJsdoc(options);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}\nAPI docs at http://localhost:${PORT}/api-docs`));
