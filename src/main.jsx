@@ -7,10 +7,12 @@ import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { getTheme } from "./theme";
 
+
 import App from "./App";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Profile from "./pages/Profile";
+import Banks from "./pages/Banks";
 import Login from "./pages/Login";
 
 
@@ -37,6 +39,7 @@ function Root() {
             <Route index element={<Home />} />
             <Route path="about" element={<About />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="banks" element={<Banks />} />
           </Route>
         </Routes>
       </BrowserRouter>
