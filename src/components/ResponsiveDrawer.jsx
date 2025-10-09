@@ -5,6 +5,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import SellIcon from '@mui/icons-material/Sell';
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import HomeIcon from "@mui/icons-material/Home";
@@ -21,6 +22,7 @@ const navItems = [
     { text: "Home", icon: <HomeIcon />, path: "/" },
     { text: "Banks", icon: <AccountBalanceIcon />, path: "/banks" },
     { text: "Sellers", icon: <SellIcon />, path: "/sellers" },
+    { text: "Invoices", icon: <ReceiptLongIcon />, path: "/invoices" },
     { text: "About", icon: <InfoIcon />, path: "/about" },
     { text: "Profile", icon: <PersonIcon />, path: "/profile" },
 ];
