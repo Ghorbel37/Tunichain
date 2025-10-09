@@ -5,6 +5,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import SellIcon from '@mui/icons-material/Sell';
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import HomeIcon from "@mui/icons-material/Home";
 import InfoIcon from "@mui/icons-material/Info";
@@ -19,6 +20,7 @@ import { Toolbar } from "@mui/material";
 const navItems = [
     { text: "Home", icon: <HomeIcon />, path: "/" },
     { text: "Banks", icon: <AccountBalanceIcon />, path: "/banks" },
+    { text: "Sellers", icon: <SellIcon />, path: "/sellers" },
     { text: "About", icon: <InfoIcon />, path: "/about" },
     { text: "Profile", icon: <PersonIcon />, path: "/profile" },
 ];

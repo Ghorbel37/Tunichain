@@ -13,6 +13,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Profile from "./pages/Profile";
 import Banks from "./pages/Banks";
+import Sellers from "./pages/Sellers";
 import Login from "./pages/Login";
 
 
@@ -40,6 +41,7 @@ function Root() {
             <Route path="about" element={<About />} />
             <Route path="profile" element={<Profile />} />
             <Route path="banks" element={<Banks />} />
+            <Route path="sellers" element={<Sellers />} />
           </Route>
         </Routes>
       </BrowserRouter>
