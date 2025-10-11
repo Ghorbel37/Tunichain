@@ -71,6 +71,8 @@ export default function Payments() {
       });
       if (!res.ok) throw new Error("Failed to add payment receipt");
       setSuccess("Payment receipt added successfully");
+      // Remove the selected invoice from the invoices list
+      setInvoices(prev => prev.filter(inv => inv._id !== form.invoice));
       setForm(f => ({
         bank: f.bank,
         invoice: "",
@@ -80,10 +82,12 @@ export default function Payments() {
         documentPath: "",
       }));
       // Refresh payments
-      fetch(`http://localhost:4000/api/payments/bank/${selectedBank}`)
-        .then(res => res.json())
-        .then(setPayments)
-        .catch(() => setPayments([]));
+      if (selectedBank) {
+        fetch(`http://localhost:4000/api/payments/bank/${selectedBank}`)
+          .then(res => res.json())
+          .then(setPayments)
+          .catch(() => setPayments([]));
+      }
     } catch (err) {
       setError(err.message || "Error adding payment receipt");
     }
