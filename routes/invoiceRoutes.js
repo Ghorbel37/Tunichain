@@ -21,4 +21,14 @@ router.get("/seller/:sellerId", async (req, res) => {
     res.json(invoices);
 });
 
+// Get all unpaid invoices
+router.get("/unpaid", async (req, res) => {
+    try {
+        const unpaidInvoices = await Invoice.find({ status: "unpaid" }).populate("seller");
+        res.json(unpaidInvoices);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 export default router;
