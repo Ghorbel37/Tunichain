@@ -15,6 +15,7 @@ import Profile from "./pages/Profile";
 import Banks from "./pages/Banks";
 import Sellers from "./pages/Sellers";
 import Invoices from "./pages/Invoices";
+import Payments from "./pages/Payments";
 import Login from "./pages/Login";
 
 
@@ -44,6 +45,7 @@ function Root() {
             <Route path="banks" element={<Banks />} />
             <Route path="sellers" element={<Sellers />} />
             <Route path="invoices" element={<Invoices />} />
+            <Route path="payments" element={<Payments />} />
           </Route>
         </Routes>
       </BrowserRouter>
