@@ -89,6 +89,15 @@ async function main() {
     } else {
         console.warn(`backend/.env not updated: backend folder not found.`);
     }
+
+        // Update .env in backend folder
+    const frontendEnvPath = path.resolve("../mui-app/.env");
+    if (fs.existsSync(path.dirname(frontendEnvPath))) {
+        updateEnvFile(frontendEnvPath, addressVars);
+        console.log(`Contract addresses updated in mui-app/.env.`);
+    } else {
+        console.warn(`mui-app/.env not updated: backend folder not found.`);
+    }
 }
 
 main().catch(console.error);
