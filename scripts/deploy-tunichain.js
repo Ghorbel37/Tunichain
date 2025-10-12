@@ -43,24 +43,35 @@ async function main() {
 
     // 5) Add addresses to .env files
     // Helper to update .env file with contract addresses, preserving comments/formatting
-    function updateEnvFile(envPath, addressVars) {
+    function updateEnvFile(envPath, addressVars, prefix = "") {
         let lines = [];
         let foundVars = {};
         if (fs.existsSync(envPath)) {
             lines = fs.readFileSync(envPath, "utf-8").split("\n");
             lines = lines.map(line => {
                 const match = line.match(/^\s*([A-Z0-9_]+)\s*=/);
-                if (match && addressVars.hasOwnProperty(match[1])) {
-                    foundVars[match[1]] = true;
-                    return `${match[1]}=${addressVars[match[1]]}`;
+                if (match) {
+                    const varName = match[1];
+                    // Only match and replace variables with the prefix (if prefix is set)
+                    if (prefix && varName.startsWith(prefix)) {
+                        const key = varName.substring(prefix.length);
+                        if (addressVars.hasOwnProperty(key)) {
+                            foundVars[key] = true;
+                            return `${varName}=${addressVars[key]}`;
+                        }
+                    } else if (!prefix && addressVars.hasOwnProperty(varName)) {
+                        foundVars[varName] = true;
+                        return `${varName}=${addressVars[varName]}`;
+                    }
                 }
                 return line;
             });
         }
         // Add any missing address variables at the end
         Object.entries(addressVars).forEach(([key, value]) => {
+            const prefixedKey = prefix + key;
             if (!foundVars[key]) {
-                lines.push(`${key}=${value}`);
+                lines.push(`${prefixedKey}=${value}`);
             }
         });
         // Remove trailing blank lines, then add one
@@ -93,7 +104,7 @@ async function main() {
         // Update .env in backend folder
     const frontendEnvPath = path.resolve("../mui-app/.env");
     if (fs.existsSync(path.dirname(frontendEnvPath))) {
-        updateEnvFile(frontendEnvPath, addressVars);
+        updateEnvFile(frontendEnvPath, addressVars, "VITE_");
         console.log(`Contract addresses updated in mui-app/.env.`);
     } else {
         console.warn(`mui-app/.env not updated: backend folder not found.`);
