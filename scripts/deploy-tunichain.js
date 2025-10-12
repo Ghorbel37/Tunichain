@@ -98,6 +98,31 @@ async function main() {
     } else {
         console.warn(`mui-app/.env not updated: backend folder not found.`);
     }
+
+    // 6) Copy ABIs to ../mui-app/src/abi
+    const abiOutputDir = path.resolve("../mui-app/src/abi");
+    if (!fs.existsSync(abiOutputDir)) {
+        fs.mkdirSync(abiOutputDir, { recursive: true });
+    }
+
+    const contractsToCopy = [
+        { name: "Registry", sol: "Registry.sol" },
+        { name: "InvoiceValidation", sol: "InvoiceValidation.sol" },
+        { name: "PaymentRegistry", sol: "PaymentRegistry.sol" },
+        { name: "VATControl", sol: "VATControl.sol" },
+    ];
+
+    contractsToCopy.forEach(({ name, sol }) => {
+        const artifactPath = path.resolve(`./artifacts/contracts/${sol}/${name}.json`);
+        const destPath = path.join(abiOutputDir, `${name}.json`);
+        if (fs.existsSync(artifactPath)) {
+            fs.copyFileSync(artifactPath, destPath);
+            // console.log(`ABI copied: ${destPath}`);
+        } else {
+            console.warn(`ABI not found for ${name}: ${artifactPath}`);
+        }
+    });
+    console.log("All ABIs copied to ../mui-app/src/abi");
 }
 
 main().catch(console.error);
