@@ -10,6 +10,13 @@ import path from "path";
 
 
 async function main() {
+    // Delete previous deployment directory
+    const deploymentPath = path.resolve("./ignition/deployments/chain-31337");
+    if (fs.existsSync(deploymentPath)) {
+        fs.rmSync(deploymentPath, { recursive: true, force: true });
+        console.log("Deleted previous deployment: chain-31337");
+    }
+
     // Get the network connection from Hardhat Runtime Environment
     const connection = await hre.network.connect();
 
