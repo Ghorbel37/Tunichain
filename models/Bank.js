@@ -7,6 +7,14 @@ const bankSchema = new mongoose.Schema({
     address: { type: String },
     registeredAt: { type: Date, default: Date.now },
     isActive: { type: Boolean, default: true },
+    blockchain: {
+        status: {
+            type: String,
+            enum: ["pending", "confirmed", "failed"],
+            default: "pending",
+        },
+        transaction: { type: String, default: null },
+    },
 });
 
 export default mongoose.model("Bank", bankSchema);
