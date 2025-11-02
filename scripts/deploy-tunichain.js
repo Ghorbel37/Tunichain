@@ -11,7 +11,7 @@ import path from "path";
 
 async function main() {
     // Delete previous deployment directory
-    const deploymentPath = path.resolve("./ignition/deployments/chain-31337");
+    const deploymentPath = path.resolve("./ignition/deployments/chain-31337/journal.jsonl");
     if (fs.existsSync(deploymentPath)) {
         fs.rmSync(deploymentPath, { recursive: true, force: true });
         console.log("Deleted previous deployment: chain-31337");
