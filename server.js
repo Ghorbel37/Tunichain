@@ -8,9 +8,24 @@ import sellerRoutes from "./routes/sellerRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import bankRoutes from "./routes/bankRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import { initBankAddedListener } from "./routes/blockchainListener.js";
 
 dotenv.config();
 connectDB();
+
+// Initialize blockchain event listener
+const RPC_URL = process.env.RPC_URL;
+const REGISTRY_ADDRESS = process.env.REGISTRY_ADDRESS;
+
+if (REGISTRY_ADDRESS) {
+  try {
+    initBankAddedListener(RPC_URL, REGISTRY_ADDRESS);
+  } catch (error) {
+    console.error("Failed to start blockchain listener:", error.message);
+  }
+} else {
+  console.warn("REGISTRY_ADDRESS not found in .env file. Blockchain listener not started.");
+}
 
 const app = express();
 app.use(cors({ origin: '*', credentials: true }));
