@@ -194,5 +194,5 @@
   "deployedLinkReferences": {},
   "immutableReferences": {},
   "inputSourceName": "project/contracts/PaymentRegistry.sol",
-  "buildInfoId": "solc-0_8_28-8a0a619fd4b12561d68d47884f1fce8e454b920d"
+  "buildInfoId": "solc-0_8_28-e9195c89decdb6998688b85e30b0c16feba00c2d"
 }
