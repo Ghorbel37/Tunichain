@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Divider, Box, TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Alert, TablePagination, InputAdornment } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
+import { ethers } from "ethers";
+import RegistryABI from "../abi/Registry.json";
+
+// Read contract address from .env
+const REGISTRY_ADDRESS = import.meta.env.VITE_REGISTRY_ADDRESS;
+const BLOCKCHAIN_NAME = import.meta.env.VITE_BLOCKCHAIN_NAME;
+const BLOCKCHAIN_CHAIN_ID = parseInt(import.meta.env.VITE_BLOCKCHAIN_CHAIN_ID);
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function Banks() {
   const [banks, setBanks] = useState([]);
@@ -16,7 +24,7 @@ export default function Banks() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:4000/api/banks");
+      const res = await fetch(`${BACKEND_URL}/api/banks`);
       if (!res.ok) throw new Error("Failed to fetch banks");
       const data = await res.json();
       setBanks(data);
@@ -39,7 +47,15 @@ export default function Banks() {
     setError("");
     setSuccess("");
     try {
-      const res = await fetch("http://localhost:4000/api/banks", {
+      //Verify metamask is installed
+      if (!window.ethereum) throw new Error("MetaMask is not installed");
+
+      // Validate form.address
+      if (!ethers.utils.isAddress(form.address)) {
+        throw new Error("Invalid Ethereum address provided for address");
+      }
+      // Backend API call
+      const res = await fetch(`${BACKEND_URL}/api/banks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -48,8 +64,32 @@ export default function Banks() {
       setForm({ name: "", bicCode: "", address: "" });
       setSuccess("Bank added successfully");
       fetchBanks();
+
+      // Blockchain transaction: call addBank on Registry contract
+      const provider = new ethers.providers.Web3Provider(window.ethereum, {
+        name: BLOCKCHAIN_NAME,
+        chainId: BLOCKCHAIN_CHAIN_ID
+      });
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(REGISTRY_ADDRESS, RegistryABI.abi, signer);
+      // The correct ABI for addBank is (address bank, string meta)
+      // We'll use form.address as the bank address, and meta as a JSON string with name and bicCode
+      const meta = JSON.stringify({ name: form.name, bicCode: form.bicCode });
+
+      const tx = await contract.addBank(form.address, meta);
+      const receipt = await tx.wait();
+      if (receipt.status === 1) {
+        // Success
+        // console.log(receipt)
+        setSuccess(`Bank added successfully`);
+      } else {
+        throw new Error("Transaction failed on-chain.");
+      }
+
     } catch (err) {
-      setError(err.message || "Error adding bank");
+      // setError(err.message || "Error adding bank");
+      setError("Error adding bank");
     }
   };
 
