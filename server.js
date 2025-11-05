@@ -8,7 +8,7 @@ import sellerRoutes from "./routes/sellerRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import bankRoutes from "./routes/bankRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
-import { initBankAddedListener } from "./routes/blockchainListener.js";
+import { initBankAddedListener, initSellerAddedListener } from "./routes/blockchainListener.js";
 
 dotenv.config();
 connectDB();
@@ -17,14 +17,15 @@ connectDB();
 const RPC_URL = process.env.RPC_URL;
 const REGISTRY_ADDRESS = process.env.REGISTRY_ADDRESS;
 
-if (REGISTRY_ADDRESS) {
+if (REGISTRY_ADDRESS && RPC_URL) {
   try {
     initBankAddedListener(RPC_URL, REGISTRY_ADDRESS);
+    initSellerAddedListener(RPC_URL, REGISTRY_ADDRESS);
   } catch (error) {
     console.error("Failed to start blockchain listener:", error.message);
   }
 } else {
-  console.warn("REGISTRY_ADDRESS not found in .env file. Blockchain listener not started.");
+  console.warn("REGISTRY_ADDRESS or RPC_URL not found in .env file. Blockchain listeners not started.");
 }
 
 const app = express();
