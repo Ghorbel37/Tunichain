@@ -8,7 +8,7 @@ import sellerRoutes from "./routes/sellerRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import bankRoutes from "./routes/bankRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
-import { initBankAddedListener, initSellerAddedListener } from "./routes/blockchainListener.js";
+import { initBankAddedListener, initSellerAddedListener, initInvoiceStoredListener } from "./routes/blockchainListener.js";
 
 dotenv.config();
 connectDB();
@@ -16,6 +16,7 @@ connectDB();
 // Initialize blockchain event listener
 const RPC_URL = process.env.RPC_URL;
 const REGISTRY_ADDRESS = process.env.REGISTRY_ADDRESS;
+const INVOICE_VALIDATION_ADDRESS = process.env.INVOICE_VALIDATION_ADDRESS;
 
 if (REGISTRY_ADDRESS && RPC_URL) {
   try {
@@ -26,6 +27,16 @@ if (REGISTRY_ADDRESS && RPC_URL) {
   }
 } else {
   console.warn("REGISTRY_ADDRESS or RPC_URL not found in .env file. Blockchain listeners not started.");
+}
+
+if (INVOICE_VALIDATION_ADDRESS && RPC_URL) {
+  try {
+    initInvoiceStoredListener(RPC_URL, INVOICE_VALIDATION_ADDRESS);
+  } catch (error) {
+    console.error("Failed to start invoice blockchain listener:", error.message);
+  }
+} else {
+  console.warn("INVOICE_VALIDATION_ADDRESS or RPC_URL not found in .env file. Invoice listener not started.");
 }
 
 const app = express();

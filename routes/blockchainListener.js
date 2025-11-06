@@ -1,10 +1,13 @@
 import { ethers } from "ethers";
 import RegistryArtifact from "../abi/Registry.json" with { type: "json" };
+import InvoiceValidationArtifact from "../abi/InvoiceValidation.json" with { type: "json" };
 import Bank from "../models/Bank.js";
 import Seller from "../models/Seller.js";
+import Invoice from "../models/Invoice.js";
 
 // Use the full ABI from the compiled contract
 const REGISTRY_ABI = RegistryArtifact.abi;
+const INVOICE_VALIDATION_ABI = InvoiceValidationArtifact.abi;
 
 /**
  * Save bank event data to database
@@ -208,5 +211,104 @@ export function stopSellerAddedListener(registryContract) {
   if (registryContract) {
     registryContract.removeAllListeners("SellerAdded");
     console.log("SellerAdded event listener stopped");
+  }
+}
+
+/**
+ * Save invoice event data to database
+ * @param {Object} eventData - Blockchain event data
+ */
+async function saveInvoiceEventToDatabase(eventData) {
+  const {
+    invoiceId,
+    invoiceHash,
+    transactionHash,
+    blockNumber,
+    logIndex,
+  } = eventData;
+
+  // Find existing invoice by hash
+  const invoice = await Invoice.findOne({ "invoiceHash": invoiceHash });
+
+  if (invoice) {
+    // Update existing invoice with blockchain confirmation data
+    invoice.blockchain = {
+      status: "confirmed",
+      transactionHash,
+      blockNumber,
+      logIndex,
+      invoiceId,
+    };
+    await invoice.save();
+    // console.log(`   Updated invoice: ${invoice.invoiceNumber} (${invoiceHash})`);
+    return invoice;
+  } else {
+    // console.warn(`   No invoice found with hash: ${invoiceHash}`);
+    // console.warn(`   Invoice must be created via API first before blockchain events can update it.`);
+    return null;
+  }
+}
+
+/**
+ * Initialize blockchain event listener for InvoiceStored events
+ * @param {string} rpcUrl - RPC URL for blockchain connection
+ * @param {string} invoiceValidationAddress - Address of the InvoiceValidation contract
+ */
+export function initInvoiceStoredListener(rpcUrl, invoiceValidationAddress) {
+  try {
+    // Create provider
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    
+    // Create contract instance
+    const invoiceContract = new ethers.Contract(
+      invoiceValidationAddress,
+      INVOICE_VALIDATION_ABI,
+      provider
+    );
+
+    console.log(`Blockchain listener initialized for contract: ${invoiceValidationAddress} \nListening for InvoiceStored events`);
+
+    // Listen for InvoiceStored events
+    // event InvoiceStored(uint256 indexed id, address indexed seller, bytes32 hash, uint256 amount)
+    invoiceContract.on("InvoiceStored", async (id, seller, hash, amount, event) => {
+      
+      try {        
+        // Convert bytes32 hash to hex string
+        const invoiceHash = hash;
+        
+        // Update database with blockchain event data
+        await saveInvoiceEventToDatabase({
+          invoiceId: id.toNumber(),
+          invoiceHash: invoiceHash,
+          transactionHash: event.transactionHash,
+          blockNumber: event.blockNumber,
+          logIndex: event.logIndex,
+        });
+      } catch (dbError) {
+        console.error("Failed to save invoice to database");
+      }
+      
+    });
+
+    // Handle provider errors
+    provider.on("error", (error) => {
+      console.error("Provider error:", error);
+    });
+
+    return { provider, invoiceContract };
+  } catch (error) {
+    console.error("Failed to initialize invoice blockchain listener:", error);
+    throw error;
+  }
+}
+
+/**
+ * Stop listening for invoice events (cleanup function)
+ * @param {ethers.Contract} invoiceContract - Contract instance
+ */
+export function stopInvoiceStoredListener(invoiceContract) {
+  if (invoiceContract) {
+    invoiceContract.removeAllListeners("InvoiceStored");
+    console.log("InvoiceStored event listener stopped");
   }
 }
