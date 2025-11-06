@@ -1,6 +1,13 @@
-
 import React, { useEffect, useState } from "react";
 import { Box, Typography, TextField, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert, MenuItem, Divider, TablePagination, InputAdornment } from "@mui/material";
+import { ethers } from "ethers";
+import InvoiceValidationABI from "../abi/InvoiceValidation.json";
+
+// Read contract address from .env
+const INVOICE_VALIDATION_ADDRESS = import.meta.env.VITE_INVOICE_VALIDATION_ADDRESS;
+const BLOCKCHAIN_NAME = import.meta.env.VITE_BLOCKCHAIN_NAME;
+const BLOCKCHAIN_CHAIN_ID = parseInt(import.meta.env.VITE_BLOCKCHAIN_CHAIN_ID);
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function Invoices() {
 
@@ -11,8 +18,6 @@ export default function Invoices() {
     seller: "",
     invoiceNumber: "",
     clientName: "",
-    totalAmount: "",
-    vatAmount: "",
     items: [{ description: "", quantity: 1, price: "" }],
   });
   const [error, setError] = useState("");
@@ -22,7 +27,7 @@ export default function Invoices() {
 
   // Fetch sellers for dropdown
   useEffect(() => {
-    fetch("http://localhost:4000/api/sellers")
+    fetch(`${BACKEND_URL}/api/sellers`)
       .then(res => res.json())
       .then(setSellers)
       .catch(() => setSellers([]));
@@ -31,7 +36,7 @@ export default function Invoices() {
   // Fetch invoices for selected seller
   useEffect(() => {
     if (!selectedSeller) return;
-    fetch(`http://localhost:4000/api/invoices/seller/${selectedSeller}`)
+    fetch(`${BACKEND_URL}/api/invoices/seller/${selectedSeller}`)
       .then(res => res.json())
       .then(setInvoices)
       .catch(() => setInvoices([]));
@@ -72,37 +77,88 @@ export default function Invoices() {
     setError("");
     setSuccess("");
     try {
-      const res = await fetch("http://localhost:4000/api/invoices", {
+      //Verify metamask is installed
+      if (!window.ethereum) throw new Error("MetaMask is not installed");
+
+      // Validate that quantity and price are positive
+      for (const item of form.items) {
+        if (parseInt(item.quantity, 10) <= 0) {
+          throw new Error("Quantity must be positive");
+        }
+        if (parseFloat(item.price) < 0.001) {
+          throw new Error("Price must be at least 0.001");
+        }
+      }
+
+      // Get seller's Ethereum address
+      const seller = sellers.find(s => s._id === form.seller);
+      if (!seller || !seller.address) {
+        throw new Error("Seller address not found");
+      }
+
+      // Prepare invoice data (preserve before form reset)
+      // Convert price from decimal (1.xxx) to integer (multiply by 1000) for precise calculations
+      const invoiceItems = form.items.map(item => ({
+        ...item,
+        quantity: parseInt(item.quantity, 10),
+        price: Math.round(parseFloat(item.price) * 1000) // Convert to integer: 1.5 -> 1500
+      }));
+
+      // Backend API call first - backend will listen for blockchain event
+      const res = await fetch(`${BACKEND_URL}/api/invoices`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          totalAmount: parseFloat(form.totalAmount),
-          vatAmount: parseFloat(form.vatAmount),
-          items: form.items.map(item => ({
-            ...item,
-            quantity: parseInt(item.quantity, 10),
-            price: parseFloat(item.price)
-          }))
+          items: invoiceItems
         }),
       });
       if (!res.ok) throw new Error("Failed to add invoice");
-      setSuccess("Invoice added successfully");
+      const invoiceData = await res.json();
+      // Showing invoice data returned from backend for debugging
+      // console.log("Invoice added in backend:", invoiceData);
+      
+      // Blockchain transaction: submit invoice to InvoiceValidation contract
+      // Use the hash and amount from backend response to ensure consistency
+      const provider = new ethers.providers.Web3Provider(window.ethereum, {
+        name: BLOCKCHAIN_NAME,
+        chainId: BLOCKCHAIN_CHAIN_ID
+      });
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(INVOICE_VALIDATION_ADDRESS, InvoiceValidationABI.abi, signer);
+
+      // Use backend's calculated hash and total amount
+      const invoiceHash = invoiceData.invoiceHash;
+      const totalAmountBN = ethers.BigNumber.from(invoiceData.totalAmount.toString());
+
+      const tx = await contract.submitInvoice(invoiceHash, totalAmountBN);
+      const receipt = await tx.wait();
+      if (receipt.status === 1) {
+        // console.log("Blockchain transaction successful - backend listener will catch event");
+      } else {
+        throw new Error("Transaction failed on-chain.");
+      }
+      
+      setSuccess("Invoice added and submitted to blockchain successfully");
+      
+      // Refresh invoices if a seller is selected in the filter
+      if (selectedSeller) {
+        fetch(`${BACKEND_URL}/api/invoices/seller/${selectedSeller}`)
+          .then(res => res.json())
+          .then(setInvoices)
+          .catch(() => setInvoices([]));
+      }
+
       setForm(f => ({
         seller: f.seller,
         invoiceNumber: "",
         clientName: "",
-        totalAmount: "",
-        vatAmount: "",
         items: [{ description: "", quantity: 1, price: "" }],
       }));
-      // Refresh invoices
-      fetch(`http://localhost:4000/api/invoices/seller/${selectedSeller}`)
-        .then(res => res.json())
-        .then(setInvoices)
-        .catch(() => setInvoices([]));
     } catch (err) {
       setError(err.message || "Error adding invoice");
+      console.error("Error submitting invoice:", err);
     }
   };
 
@@ -143,23 +199,6 @@ export default function Invoices() {
           required
           sx={{ mr: 2 }}
         />
-        <TextField
-          label="Total Amount"
-          name="totalAmount"
-          value={form.totalAmount}
-          onChange={handleFormChange}
-          type="number"
-          required
-          sx={{ mr: 2 }}
-        />
-        <TextField
-          label="VAT Amount"
-          name="vatAmount"
-          value={form.vatAmount}
-          onChange={handleFormChange}
-          type="number"
-          required
-        />
         <Divider sx={{ my: 2 }} />
         <Typography variant="subtitle1" sx={{ mb: 1 }}>Items</Typography>
         {form.items.map((item, idx) => (
@@ -177,6 +216,7 @@ export default function Invoices() {
               value={item.quantity}
               onChange={e => handleItemChange(idx, 'quantity', e.target.value)}
               required
+              inputProps={{ min: 1 }}
               sx={{ width: 100 }}
             />
             <TextField
@@ -185,6 +225,7 @@ export default function Invoices() {
               value={item.price}
               onChange={e => handleItemChange(idx, 'price', e.target.value)}
               required
+              inputProps={{ min: 0.000, step: 0.01 }}
               sx={{ width: 120 }}
             />
             <Button color="error" onClick={() => removeItem(idx)} disabled={form.items.length === 1}>Remove</Button>
@@ -234,12 +275,12 @@ export default function Invoices() {
                 <TableRow key={inv._id || idx}>
                   <TableCell>{inv.invoiceNumber}</TableCell>
                   <TableCell>{inv.clientName}</TableCell>
-                  <TableCell>{inv.totalAmount}</TableCell>
-                  <TableCell>{inv.vatAmount}</TableCell>
+                  <TableCell>{inv.totalAmount ? (inv.totalAmount / 1000).toFixed(3) : '0.000'}</TableCell>
+                  <TableCell>{inv.vatAmount ? (inv.vatAmount / 1000).toFixed(3) : '0.000'}</TableCell>
                   <TableCell>
                     {inv.items && inv.items.map((item, i) => (
                       <div key={i}>
-                        {item.description} (x{item.quantity}) - ${item.price}
+                        {item.description} (x{item.quantity}) - {(item.price / 1000).toFixed(3)}
                       </div>
                     ))}
                   </TableCell>
