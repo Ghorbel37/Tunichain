@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, TextField, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert, MenuItem, Divider, TablePagination } from "@mui/material";
+import { ethers } from "ethers";
+import PaymentRegistryABI from "../abi/PaymentRegistry.json";
+
+// Read contract address from .env
+const PAYMENT_REGISTRY_ADDRESS = import.meta.env.VITE_PAYMENT_REGISTRY_ADDRESS;
+const BLOCKCHAIN_NAME = import.meta.env.VITE_BLOCKCHAIN_NAME;
+const BLOCKCHAIN_CHAIN_ID = parseInt(import.meta.env.VITE_BLOCKCHAIN_CHAIN_ID);
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function Payments() {
   const [banks, setBanks] = useState([]);
@@ -21,11 +29,11 @@ export default function Payments() {
 
   // Fetch banks and invoices for dropdowns
   useEffect(() => {
-    fetch("http://localhost:4000/api/banks")
+    fetch(`${BACKEND_URL}/api/banks`)
       .then(res => res.json())
       .then(setBanks)
       .catch(() => setBanks([]));
-    fetch("http://localhost:4000/api/invoices/unpaid")
+    fetch(`${BACKEND_URL}/api/invoices/unpaid`)
       .then(res => res.json())
       .then(setInvoices)
       .catch(() => setInvoices([]));
@@ -34,7 +42,7 @@ export default function Payments() {
   // Fetch payments for selected bank
   useEffect(() => {
     if (!selectedBank) return;
-    fetch(`http://localhost:4000/api/payments/bank/${selectedBank}`)
+    fetch(`${BACKEND_URL}/api/payments/bank/${selectedBank}`)
       .then(res => res.json())
       .then(setPayments)
       .catch(() => setPayments([]));
@@ -64,15 +72,97 @@ export default function Payments() {
     setError("");
     setSuccess("");
     try {
-      const res = await fetch("http://localhost:4000/api/payments", {
+      //Verify metamask is installed
+      if (!window.ethereum) throw new Error("MetaMask is not installed");
+
+      // Validate amount is positive
+      if (parseFloat(form.amountPaid) <= 0) {
+        throw new Error("Amount paid must be positive");
+      }
+
+      // Get bank's Ethereum address
+      const bank = banks.find(b => b._id === form.bank);
+      if (!bank || !bank.address) {
+        throw new Error("Bank address not found");
+      }
+
+      // Convert amount from decimal to integer (multiply by 1000)
+      const amountPaidInteger = Math.round(parseFloat(form.amountPaid) * 1000);
+
+      // Backend API call first - backend will listen for blockchain event
+      const res = await fetch(`${BACKEND_URL}/api/payments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          amountPaid: amountPaidInteger
+        }),
       });
       if (!res.ok) throw new Error("Failed to add payment receipt");
-      setSuccess("Payment receipt added successfully");
+      const paymentData = await res.json();
+      console.log("Payment added in backend:", paymentData);
+
+      // Resolve hashes and amount from backend response
+      let paymentHash = paymentData.paymentHash || paymentData?.blockchain?.paymentHash;
+      let invoiceHash = (paymentData.invoice && paymentData.invoice.invoiceHash) || paymentData.invoiceHash;
+      const amountPaidBN = ethers.BigNumber.from(String(paymentData.amountPaid));
+
+      // // Fallback: fetch invoice hash if missing
+      // if (!invoiceHash && form.invoice) {
+      //   try {
+      //     const invRes = await fetch(`${BACKEND_URL}/api/invoices/${form.invoice}`);
+      //     if (invRes.ok) {
+      //       const inv = await invRes.json();
+      //       invoiceHash = inv.invoiceHash;
+      //     }
+      //   } catch (_) {}
+      // }
+
+      // Validate hashes
+      if (!paymentHash || !ethers.utils.isHexString(paymentHash, 32)) {
+        throw new Error("Invalid paymentHash from backend (must be 32-byte hex)");
+      }
+      if (!invoiceHash || !ethers.utils.isHexString(invoiceHash, 32)) {
+        throw new Error("Invalid invoiceHash from backend (must be 32-byte hex)");
+      }
+
+      // Blockchain transaction: store payment in PaymentRegistry contract
+      const provider = new ethers.providers.Web3Provider(window.ethereum, {
+        name: BLOCKCHAIN_NAME,
+        chainId: BLOCKCHAIN_CHAIN_ID
+      });
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+
+      // Ensure signer is the bank address
+      const connected = (await signer.getAddress()).toLowerCase();
+      if (bank.address && connected !== bank.address.toLowerCase()) {
+        throw new Error(`Please switch MetaMask to the bank's address: ${bank.address}`);
+      }
+
+      const contract = new ethers.Contract(PAYMENT_REGISTRY_ADDRESS, PaymentRegistryABI.abi, signer);
+
+      const tx = await contract.storePayment(paymentHash, invoiceHash, amountPaidBN);
+      const receipt = await tx.wait();
+      if (receipt.status === 1) {
+        // console.log("Blockchain transaction successful - backend listener will catch event");
+      } else {
+        throw new Error("Transaction failed on-chain.");
+      }
+
+      setSuccess("Payment receipt added and submitted to blockchain successfully");
+      
       // Remove the selected invoice from the invoices list
       setInvoices(prev => prev.filter(inv => inv._id !== form.invoice));
+      
+      // Refresh payments if a bank is selected in the filter
+      if (selectedBank) {
+        fetch(`${BACKEND_URL}/api/payments/bank/${selectedBank}`)
+          .then(res => res.json())
+          .then(setPayments)
+          .catch(() => setPayments([]));
+      }
+
       setForm(f => ({
         bank: f.bank,
         invoice: "",
@@ -81,15 +171,9 @@ export default function Payments() {
         paidAt: "",
         documentPath: "",
       }));
-      // Refresh payments
-      if (selectedBank) {
-        fetch(`http://localhost:4000/api/payments/bank/${selectedBank}`)
-          .then(res => res.json())
-          .then(setPayments)
-          .catch(() => setPayments([]));
-      }
     } catch (err) {
       setError(err.message || "Error adding payment receipt");
+      console.error("Error submitting payment:", err);
     }
   };
 
@@ -142,6 +226,7 @@ export default function Payments() {
           onChange={handleFormChange}
           type="number"
           required
+          inputProps={{ min: 0.000, step: 0.01 }}
           sx={{ mr: 2 }}
         />
         <TextField
@@ -202,7 +287,7 @@ export default function Payments() {
                 <TableRow key={pay._id || idx}>
                   <TableCell>{pay.paymentReference}</TableCell>
                   <TableCell>{pay.invoice._id}</TableCell>
-                  <TableCell>{pay.amountPaid}</TableCell>
+                  <TableCell>{pay.amountPaid ? (pay.amountPaid / 1000).toFixed(3) : '0.000'}</TableCell>
                   <TableCell>{pay.paidAt}</TableCell>
                   <TableCell>{pay.documentPath}</TableCell>
                 </TableRow>
