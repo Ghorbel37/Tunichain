@@ -8,7 +8,7 @@ import sellerRoutes from "./routes/sellerRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import bankRoutes from "./routes/bankRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
-import { initBankAddedListener, initSellerAddedListener, initInvoiceStoredListener } from "./routes/blockchainListener.js";
+import { initBankAddedListener, initSellerAddedListener, initInvoiceStoredListener, initPaymentStoredListener } from "./routes/blockchainListener.js";
 
 dotenv.config();
 connectDB();
@@ -17,6 +17,7 @@ connectDB();
 const RPC_URL = process.env.RPC_URL;
 const REGISTRY_ADDRESS = process.env.REGISTRY_ADDRESS;
 const INVOICE_VALIDATION_ADDRESS = process.env.INVOICE_VALIDATION_ADDRESS;
+const PAYMENT_REGISTRY_ADDRESS = process.env.PAYMENT_REGISTRY_ADDRESS;
 
 if (REGISTRY_ADDRESS && RPC_URL) {
   try {
@@ -37,6 +38,16 @@ if (INVOICE_VALIDATION_ADDRESS && RPC_URL) {
   }
 } else {
   console.warn("INVOICE_VALIDATION_ADDRESS or RPC_URL not found in .env file. Invoice listener not started.");
+}
+
+if (PAYMENT_REGISTRY_ADDRESS && RPC_URL) {
+  try {
+    initPaymentStoredListener(RPC_URL, PAYMENT_REGISTRY_ADDRESS);
+  } catch (error) {
+    console.error("Failed to start payment blockchain listener:", error.message);
+  }
+} else {
+  console.warn("PAYMENT_REGISTRY_ADDRESS or RPC_URL not found in .env file. Payment listener not started.");
 }
 
 const app = express();

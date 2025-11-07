@@ -1,13 +1,16 @@
 import { ethers } from "ethers";
 import RegistryArtifact from "../abi/Registry.json" with { type: "json" };
 import InvoiceValidationArtifact from "../abi/InvoiceValidation.json" with { type: "json" };
+import PaymentRegistryArtifact from "../abi/PaymentRegistry.json" with { type: "json" };
 import Bank from "../models/Bank.js";
 import Seller from "../models/Seller.js";
 import Invoice from "../models/Invoice.js";
+import PaymentProof from "../models/PaymentProof.js";
 
 // Use the full ABI from the compiled contract
 const REGISTRY_ABI = RegistryArtifact.abi;
 const INVOICE_VALIDATION_ABI = InvoiceValidationArtifact.abi;
+const PAYMENT_REGISTRY_ABI = PaymentRegistryArtifact.abi;
 
 /**
  * Save bank event data to database
@@ -310,5 +313,101 @@ export function stopInvoiceStoredListener(invoiceContract) {
   if (invoiceContract) {
     invoiceContract.removeAllListeners("InvoiceStored");
     console.log("InvoiceStored event listener stopped");
+  }
+}
+
+/**
+ * Save payment event data to database
+ * @param {Object} eventData - Blockchain event data
+ */
+async function savePaymentEventToDatabase(eventData) {
+  const {
+    paymentId,
+    paymentHash,
+    transactionHash,
+    blockNumber,
+    logIndex,
+  } = eventData;
+
+  // Find existing payment by hash
+  const payment = await PaymentProof.findOne({ "paymentHash": paymentHash });
+
+  if (payment) {
+    // Update existing payment with blockchain confirmation data
+    payment.blockchain = {
+      status: "confirmed",
+      transactionHash,
+      blockNumber,
+      logIndex,
+      paymentId,
+    };
+    await payment.save();
+    // console.log(`   Updated payment: ${payment.paymentReference} (${paymentHash})`);
+    return payment;
+  } else {
+    // console.warn(`   No payment found with hash: ${paymentHash}`);
+    // console.warn(`   Payment must be created via API first before blockchain events can update it.`);
+    return null;
+  }
+}
+
+/**
+ * Initialize blockchain event listener for PaymentStored events
+ * @param {string} rpcUrl - RPC URL for blockchain connection
+ * @param {string} paymentRegistryAddress - Address of the PaymentRegistry contract
+ */
+export function initPaymentStoredListener(rpcUrl, paymentRegistryAddress) {
+  try {
+    // Create provider
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    
+    // Create contract instance
+    const paymentContract = new ethers.Contract(
+      paymentRegistryAddress,
+      PAYMENT_REGISTRY_ABI,
+      provider
+    );
+
+    console.log(`Blockchain listener initialized for contract: ${paymentRegistryAddress} \nListening for PaymentStored events`);
+
+    // Listen for PaymentStored events
+    // event PaymentStored(uint256 indexed id, address indexed bank, uint256 invoiceId, bytes32 paymentHash, uint256 amountPaid)
+    paymentContract.on("PaymentStored", async (id, bank, invoiceId, paymentHash, amountPaid, event) => {
+      
+      try {        
+        // Update database with blockchain event data
+        await savePaymentEventToDatabase({
+          paymentId: id.toNumber(),
+          paymentHash: paymentHash,
+          transactionHash: event.transactionHash,
+          blockNumber: event.blockNumber,
+          logIndex: event.logIndex,
+        });
+      } catch (dbError) {
+        console.error("Failed to save payment to database");
+      }
+      
+    });
+
+    // Handle provider errors
+    provider.on("error", (error) => {
+      console.error("Provider error:", error);
+    });
+
+    return { provider, paymentContract };
+  } catch (error) {
+    console.error("Failed to initialize payment blockchain listener:", error);
+    throw error;
+  }
+}
+
+/**
+ * Stop listening for payment events (cleanup function)
+ * @param {ethers.Contract} paymentContract - Contract instance
+ */
+export function stopPaymentStoredListener(paymentContract) {
+  if (paymentContract) {
+    paymentContract.removeAllListeners("PaymentStored");
+    console.log("PaymentStored event listener stopped");
   }
 }
