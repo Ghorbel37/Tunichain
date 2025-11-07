@@ -16,7 +16,12 @@ router.post("/", async (req, res) => {
         // Update invoice status
         await Invoice.findByIdAndUpdate(invoice, { status: "paid" });
 
-        res.status(201).json(proof);
+        // Re-fetch with population to include related docs and ensure paymentHash is present
+        const saved = await PaymentProof.findById(proof._id)
+            .populate("bank")
+            .populate("invoice");
+
+        res.status(201).json(saved);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
