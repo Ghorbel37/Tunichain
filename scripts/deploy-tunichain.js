@@ -20,8 +20,13 @@ async function main() {
     // Get the network connection from Hardhat Runtime Environment
     const connection = await hre.network.connect();
 
+    // Get wallet client for signing transactions - we'll use its address as admin
+    const walletClients = await connection.viem.getWalletClients();
+    const adminAddress = walletClients[0].account.address;
+    console.log(`Using address as admin: ${adminAddress}\n`);
+
     // 1) Deploy Registry (constructor requires admin address)
-    const adminAddress = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
+    console.log("Deploying smart contracts...")
     const { registry } = await connection.ignition.deploy(Registry, {
         parameters: { Registry: { adminAddress } },
     });
@@ -41,14 +46,49 @@ async function main() {
     });
     console.log(`PaymentRegistry deployed to: ${paymentRegistry.address}`);
 
-    // 4) Deploy VATControl (constructor requires paymentRegistry and invoiceValidation addresses)
+    // 4) Deploy VATControl (constructor requires invoiceValidation and paymentRegistry addresses)
     const paymentRegistryAddress = paymentRegistry.address;
     const { vatControl } = await connection.ignition.deploy(VATControl, {
-        parameters: { VATControl: { paymentRegistryAddress, invoiceValidationAddress } },
+        parameters: { VATControl: { invoiceValidationAddress, paymentRegistryAddress } },
     });
     console.log(`VATControl deployed to: ${vatControl.address}`);
 
-    // 5) Add addresses to .env files
+    // 5) Wire up VATControl to enable automatic VAT recording
+    console.log("\nConnecting VATControl to contracts...");
+    // Read invoiceVal abi file
+    const invoiceValidationArtifact = JSON.parse(
+        fs.readFileSync(path.resolve("./artifacts/contracts/InvoiceValidation.sol/InvoiceValidation.json"), "utf-8")
+    );
+    // Read paymentRegistry abi file
+    const paymentRegistryArtifact = JSON.parse(
+        fs.readFileSync(path.resolve("./artifacts/contracts/PaymentRegistry.sol/PaymentRegistry.json"), "utf-8")
+    );
+
+    const publicClient = await connection.viem.getPublicClient();
+    const walletClient = walletClients[0];
+
+    // Set VATControl on InvoiceValidation
+    const tx1 = await walletClient.writeContract({
+        address: invoiceValidation.address,
+        abi: invoiceValidationArtifact.abi,
+        functionName: "setVATControl",
+        args: [vatControl.address],
+    });
+    await publicClient.waitForTransactionReceipt({ hash: tx1 });
+    console.log("InvoiceValidation.setVATControl() complete");
+
+    // Set VATControl on PaymentRegistry
+    const tx2 = await walletClient.writeContract({
+        address: paymentRegistry.address,
+        abi: paymentRegistryArtifact.abi,
+        functionName: "setVATControl",
+        args: [vatControl.address],
+    });
+    await publicClient.waitForTransactionReceipt({ hash: tx2 });
+    console.log("PaymentRegistry.setVATControl() complete");
+    console.log("VATControl wired up successfully!");
+
+    // 6) Add addresses to .env files
     // Helper to update .env file with contract addresses, preserving comments/formatting
     function updateEnvFile(envPath, addressVars, prefix = "") {
         let lines = [];
@@ -117,7 +157,7 @@ async function main() {
         console.warn(`mui-app/.env not updated: backend folder not found.`);
     }
 
-    // 6) Copy ABIs to ../mui-app/src/abi
+    // 7) Copy ABIs to ../mui-app/src/abi
     const abiOutputDir = path.resolve("../mui-app/src/abi");
     if (!fs.existsSync(abiOutputDir)) {
         fs.mkdirSync(abiOutputDir, { recursive: true });
