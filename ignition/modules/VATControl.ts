@@ -4,7 +4,7 @@ import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 export default buildModule("VATControl", (m) => {
     const paymentRegistryAddress = m.getParameter("paymentRegistryAddress");
     const invoiceValidationAddress = m.getParameter("invoiceValidationAddress");
-    const vatControl = m.contract("VATControl", [paymentRegistryAddress, invoiceValidationAddress]);
+    const vatControl = m.contract("VATControl", [invoiceValidationAddress, paymentRegistryAddress]);
 
     // m.call(registry, "launch", []);
     return { vatControl };
