@@ -13,10 +13,16 @@ interface IInvoiceValidation {
     function invoices(uint256) external view returns (uint256, address, bytes32, string memory, uint256, uint256);
 }
 
+interface IVATControl {
+    function recordPayment(uint256 paymentId) external;
+}
+
 contract PaymentRegistry {
     IRegistry public registry;
     IInvoiceValidation public invoiceValidation;
+    IVATControl public vatControl;
     uint256 public paymentCounter;
+    address public admin;
 
     struct Payment {
         uint256 id;
@@ -35,6 +41,13 @@ contract PaymentRegistry {
     constructor(address registryAddr, address invoiceValidationAddr) {
         registry = IRegistry(registryAddr);
         invoiceValidation = IInvoiceValidation(invoiceValidationAddr);
+        admin = msg.sender;
+    }
+
+    // Admin can set VATControl after deployment
+    function setVATControl(address vatControlAddr) external {
+        require(msg.sender == admin, "only admin");
+        vatControl = IVATControl(vatControlAddr);
     }
 
     function storePayment(bytes32 paymentHash, bytes32 invoiceHash, uint256 amountPaid) external returns (uint256) {
@@ -49,6 +62,12 @@ contract PaymentRegistry {
         paymentHashToId[paymentHash] = paymentCounter;
 
         emit PaymentStored(paymentCounter, msg.sender, invId, paymentHash, amountPaid);
+        
+        // Automatically record VAT for payment
+        if (address(vatControl) != address(0)) {
+            vatControl.recordPayment(paymentCounter);
+        }
+        
         return paymentCounter;
     }
 }

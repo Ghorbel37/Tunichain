@@ -10,17 +10,23 @@ interface IRegistry {
     function isSeller(address) external view returns (bool);
 }
 
+interface IVATControl {
+    function recordInvoiceTax(uint256 invoiceId) external;
+}
+
 contract InvoiceValidation {
     using ECDSA for bytes32;
 
     IRegistry public registry;
+    IVATControl public vatControl;
     uint256 public invoiceCounter;
+    address public admin;
 
     struct Invoice {
         uint256 id;
         address seller;
         bytes32 invoiceHash; // e.g., keccak256(file)
-        uint256 amount; // in cents
+        uint256 amount; // in millimes
         uint256 timestamp;
     }
 
@@ -31,6 +37,13 @@ contract InvoiceValidation {
 
     constructor(address registryAddr) {
         registry = IRegistry(registryAddr);
+        admin = msg.sender;
+    }
+
+    // Admin can set VATControl after deployment
+    function setVATControl(address vatControlAddr) external {
+        require(msg.sender == admin, "only admin");
+        vatControl = IVATControl(vatControlAddr);
     }
 
     // Seller submits invoice (could include seller signature for additional proof)
@@ -43,6 +56,12 @@ contract InvoiceValidation {
         hashToId[invoiceHash] = invoiceCounter;
 
         emit InvoiceStored(invoiceCounter, msg.sender, invoiceHash, amount);
+        
+        // Automatically record VAT
+        if (address(vatControl) != address(0)) {
+            vatControl.recordInvoiceTax(invoiceCounter);
+        }
+        
         return invoiceCounter;
     }
 
