@@ -27,6 +27,7 @@ contract InvoiceValidation {
         address seller;
         bytes32 invoiceHash; // e.g., keccak256(file)
         uint256 amount; // in millimes
+        uint256 vatRatePermille;
         uint256 timestamp;
     }
 
@@ -47,12 +48,12 @@ contract InvoiceValidation {
     }
 
     // Seller submits invoice (could include seller signature for additional proof)
-    function submitInvoice(bytes32 invoiceHash, uint256 amount) external returns (uint256) {
+    function submitInvoice(bytes32 invoiceHash, uint256 amount, uint256 vatRatePermille) external returns (uint256) {
         require(registry.isSeller(msg.sender), "not registered seller");
         require(hashToId[invoiceHash] == 0, "already stored");
 
         invoiceCounter++;
-        invoices[invoiceCounter] = Invoice(invoiceCounter, msg.sender, invoiceHash, amount, block.timestamp);
+        invoices[invoiceCounter] = Invoice(invoiceCounter, msg.sender, invoiceHash, amount, vatRatePermille, block.timestamp);
         hashToId[invoiceHash] = invoiceCounter;
 
         emit InvoiceStored(invoiceCounter, msg.sender, invoiceHash, amount);
