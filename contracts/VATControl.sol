@@ -24,8 +24,8 @@ contract VATControl {
     uint256 public vatRatePermille = 190; // e.g., 190 = 19.0% => store per-mille or basis points
 
     // Events for off-chain monitoring
-    event VATRecorded(address indexed seller, uint256 indexed invoiceId, uint256 taxableAmount, uint256 vatAmount, uint256 sellerTotalTaxBase, uint256 timestamp);
-    event VATPaymentRecorded(address indexed seller, uint256 indexed paymentId, uint256 indexed invoiceId, uint256 amountPaid, uint256 vatAmount, uint256 sellerTotalVatPaid, uint256 timestamp);
+    event VATRecorded(address indexed seller, uint256 indexed invoiceId, uint256 taxableAmount, uint256 vatRatePermille, uint256 vatAmount, uint256 sellerTotalTaxBase, uint256 timestamp);
+    event VATPaymentRecorded(address indexed seller, uint256 indexed paymentId, uint256 indexed invoiceId, uint256 amountPaid, uint256 vatRatePermille, uint256 vatAmount, uint256 sellerTotalVatPaid, uint256 timestamp);
     event VATRateUpdated(uint256 oldRate, uint256 newRate, uint256 timestamp);
 
     constructor(address invoiceAddr, address paymentAddr) {
@@ -40,7 +40,7 @@ contract VATControl {
         sellerTaxBase[seller] += amount;
         sellerVatOwed[seller] += vat;
         // Do not auto-credit as paid; payments recorded separately.
-        emit VATRecorded(seller, invoiceId, amount, vat, sellerTaxBase[seller], block.timestamp);
+        emit VATRecorded(seller, invoiceId, amount, invoiceVatRatePermille, vat, sellerTaxBase[seller], block.timestamp);
     }
 
     // Optionally, call when a payment is recorded (match payment->invoice then mark VAT as paid)
@@ -50,7 +50,7 @@ contract VATControl {
         uint256 vat = invoiceAmount * invoiceVatRatePermille / 1000;
         // business logic: determine how much of amountPaid is VAT portion
         sellerVatPaid[seller] += vat;
-        emit VATPaymentRecorded(seller, paymentId, invoiceId, amountPaid, vat, sellerVatPaid[seller], block.timestamp);
+        emit VATPaymentRecorded(seller, paymentId, invoiceId, amountPaid, invoiceVatRatePermille, vat, sellerVatPaid[seller], block.timestamp);
     }
 
     // admin function to set vat rate

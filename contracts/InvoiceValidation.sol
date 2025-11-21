@@ -34,7 +34,7 @@ contract InvoiceValidation {
     mapping(uint256 => Invoice) public invoices;
     mapping(bytes32 => uint256) public hashToId;
 
-    event InvoiceStored(uint256 indexed id, address indexed seller, bytes32 hash, uint256 amount);
+    event InvoiceStored(uint256 indexed id, address indexed seller, bytes32 hash, uint256 amount, uint256 vatRatePermille, uint256 vatAmount);
 
     constructor(address registryAddr) {
         registry = IRegistry(registryAddr);
@@ -56,7 +56,8 @@ contract InvoiceValidation {
         invoices[invoiceCounter] = Invoice(invoiceCounter, msg.sender, invoiceHash, amount, vatRatePermille, block.timestamp);
         hashToId[invoiceHash] = invoiceCounter;
 
-        emit InvoiceStored(invoiceCounter, msg.sender, invoiceHash, amount);
+        uint256 vatAmount = amount * vatRatePermille / 1000;
+        emit InvoiceStored(invoiceCounter, msg.sender, invoiceHash, amount, vatRatePermille, vatAmount);
         
         // Automatically record VAT
         if (address(vatControl) != address(0)) {
