@@ -19,6 +19,7 @@ contract VATControl {
     // seller => total taxable base (in cents)
     mapping(address => uint256) public sellerTaxBase;
     mapping(address => uint256) public sellerVatPaid; // if payments include VAT amount
+    mapping(address => uint256) public sellerVatOwed; // total VAT owed based on recorded invoices
 
     uint256 public vatRatePermille = 190; // e.g., 190 = 19.0% => store per-mille or basis points
 
@@ -37,6 +38,7 @@ contract VATControl {
         ( , address seller, , uint256 amount, uint256 invoiceVatRatePermille, ) = invoiceReg.invoices(invoiceId);
         uint256 vat = amount * invoiceVatRatePermille / 1000;
         sellerTaxBase[seller] += amount;
+        sellerVatOwed[seller] += vat;
         // Do not auto-credit as paid; payments recorded separately.
         emit VATRecorded(seller, invoiceId, amount, vat, sellerTaxBase[seller], block.timestamp);
     }
@@ -67,7 +69,18 @@ contract VATControl {
     ) {
         totalTaxBase = sellerTaxBase[seller];
         totalVatPaid = sellerVatPaid[seller];
-        // Calculate total VAT owed based on current rate
-        totalVatOwed = (totalTaxBase * vatRatePermille) / 1000;
+        // VAT owed accumulated from recorded invoices (net amount model)
+        totalVatOwed = sellerVatOwed[seller];
+    }
+
+    // View function to get the difference between VAT owed and VAT paid (outstanding VAT)
+    function getSellerVATOutstanding(address seller) external view returns (uint256 outstandingVat) {
+        uint256 owed = sellerVatOwed[seller];
+        uint256 paid = sellerVatPaid[seller];
+        if (owed > paid) {
+            outstandingVat = owed - paid;
+        } else {
+            outstandingVat = 0;
+        }
     }
 }
