@@ -18,6 +18,7 @@ export default function Invoices() {
     seller: "",
     invoiceNumber: "",
     clientName: "",
+    vatRate: "190",
     items: [{ description: "", quantity: 1, price: "" }],
   });
   const [error, setError] = useState("");
@@ -110,14 +111,15 @@ export default function Invoices() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          items: invoiceItems
+          items: invoiceItems,
+          vatRate: parseInt(form.vatRate, 10)
         }),
       });
       if (!res.ok) throw new Error("Failed to add invoice");
       const invoiceData = await res.json();
       // Showing invoice data returned from backend for debugging
       // console.log("Invoice added in backend:", invoiceData);
-      
+
       // Blockchain transaction: submit invoice to InvoiceValidation contract
       // Use the hash and amount from backend response to ensure consistency
       const provider = new ethers.providers.Web3Provider(window.ethereum, {
@@ -131,17 +133,18 @@ export default function Invoices() {
       // Use backend's calculated hash and total amount
       const invoiceHash = invoiceData.invoiceHash;
       const totalAmountBN = ethers.BigNumber.from(invoiceData.totalAmount.toString());
+      const vatRatePermille = parseInt(form.vatRate, 10);
 
-      const tx = await contract.submitInvoice(invoiceHash, totalAmountBN);
+      const tx = await contract.submitInvoice(invoiceHash, totalAmountBN, vatRatePermille);
       const receipt = await tx.wait();
       if (receipt.status === 1) {
         // console.log("Blockchain transaction successful - backend listener will catch event");
       } else {
         throw new Error("Transaction failed on-chain.");
       }
-      
+
       setSuccess("Invoice added and submitted to blockchain successfully");
-      
+
       // Refresh invoices if a seller is selected in the filter
       if (selectedSeller) {
         fetch(`${BACKEND_URL}/api/invoices/seller/${selectedSeller}`)
@@ -154,6 +157,7 @@ export default function Invoices() {
         seller: f.seller,
         invoiceNumber: "",
         clientName: "",
+        vatRate: f.vatRate,
         items: [{ description: "", quantity: 1, price: "" }],
       }));
     } catch (err) {
@@ -199,6 +203,19 @@ export default function Invoices() {
           required
           sx={{ mr: 2 }}
         />
+        <TextField
+          select
+          label="VAT Rate"
+          name="vatRate"
+          value={form.vatRate}
+          onChange={handleFormChange}
+          required
+          sx={{ mr: 2, minWidth: 150 }}
+        >
+          <MenuItem value="190">19%</MenuItem>
+          <MenuItem value="70">7%</MenuItem>
+          <MenuItem value="0">0%</MenuItem>
+        </TextField>
         <Divider sx={{ my: 2 }} />
         <Typography variant="subtitle1" sx={{ mb: 1 }}>Items</Typography>
         {form.items.map((item, idx) => (
@@ -240,7 +257,7 @@ export default function Invoices() {
       </Box>
       <Divider sx={{ mb: 2 }} />
       <Typography variant="h6" sx={{ mb: 2 }}>Invoices for Selected Seller</Typography>
-        {/* Seller filter menu above the table */}
+      {/* Seller filter menu above the table */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <TextField
           select
