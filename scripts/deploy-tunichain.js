@@ -181,6 +181,25 @@ async function main() {
         }
     });
     console.log("All ABIs copied to ../mui-app/src/abi");
+
+
+    // 8) Copy ABIs to ../backend/abi
+    const abiOutputDir2 = path.resolve("../backend/abi");
+    if (!fs.existsSync(abiOutputDir2)) {
+        fs.mkdirSync(abiOutputDir2, { recursive: true });
+    }
+
+    contractsToCopy.forEach(({ name, sol }) => {
+        const artifactPath = path.resolve(`./artifacts/contracts/${sol}/${name}.json`);
+        const destPath = path.join(abiOutputDir2, `${name}.json`);
+        if (fs.existsSync(artifactPath)) {
+            fs.copyFileSync(artifactPath, destPath);
+            // console.log(`ABI copied: ${destPath}`);
+        } else {
+            console.warn(`ABI not found for ${name}: ${artifactPath}`);
+        }
+    });
+    console.log("All ABIs copied to ../backend/abi");
 }
 
 main().catch(console.error);
