@@ -112,7 +112,7 @@ export default function Invoices() {
         body: JSON.stringify({
           ...form,
           items: invoiceItems,
-          vatRate: parseInt(form.vatRate, 10)
+          vatRatePermille: parseInt(form.vatRate, 10)
         }),
       });
       if (!res.ok) throw new Error("Failed to add invoice");
