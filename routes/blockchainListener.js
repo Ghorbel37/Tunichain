@@ -343,11 +343,43 @@ async function savePaymentEventToDatabase(eventData) {
     };
     await payment.save();
     // console.log(`   Updated payment: ${payment.paymentReference} (${paymentHash})`);
+    
+    // Mark associated invoice as paid
+    if (payment.invoice) {
+      await markInvoiceAsPaid(payment.invoice);
+    }
+    
     return payment;
   } else {
     // console.warn(`   No payment found with hash: ${paymentHash}`);
     // console.warn(`   Payment must be created via API first before blockchain events can update it.`);
     return null;
+  }
+}
+
+/**
+ * Mark an invoice as paid in the database
+ * @param {string} invoiceId - The ID of the invoice to mark as paid
+ * @returns {Promise<Object>} The updated invoice document
+ */
+async function markInvoiceAsPaid(invoiceId) {
+  try {
+    const updatedInvoice = await Invoice.findByIdAndUpdate(
+      invoiceId,
+      { status: 'paid' },
+      { new: true }
+    );
+    
+    if (!updatedInvoice) {
+      console.warn(`Invoice with ID ${invoiceId} not found when trying to mark as paid`);
+      return null;
+    }
+    
+    // console.log(`Marked invoice ${invoiceId} as paid`);
+    return updatedInvoice;
+  } catch (error) {
+    console.error('Error marking invoice as paid:', error);
+    throw error;
   }
 }
 
