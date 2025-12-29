@@ -272,8 +272,8 @@ export function initInvoiceStoredListener(rpcUrl, invoiceValidationAddress) {
     console.log(`Blockchain listener initialized for contract: ${invoiceValidationAddress} \nListening for InvoiceStored events`);
 
     // Listen for InvoiceStored events
-    // event InvoiceStored(uint256 indexed id, address indexed seller, bytes32 hash, uint256 amount)
-    invoiceContract.on("InvoiceStored", async (id, seller, hash, amount, event) => {
+    // event InvoiceStored(uint256 indexed id, address indexed seller, bytes32 hash, uint256 amount, uint256 vatRatePermille, uint256 vatAmount)
+    invoiceContract.on("InvoiceStored", async (id, seller, hash, amount, vatRatePermille, vatAmount, event) => {
       
       try {        
         // Convert bytes32 hash to hex string
