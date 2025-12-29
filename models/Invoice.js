@@ -10,6 +10,7 @@ const invoiceSchema = new mongoose.Schema({
     totalAmount: { type: Number, default: 0 },
     vatRatePermille: { type: Number, default: 190 },
     vatAmount: { type: Number, default: 0 },
+    totalAmountWithVat: { type: Number, default: 0 },
     items: [
         {
             description: String,
@@ -41,6 +42,7 @@ invoiceSchema.pre('save', async function(next) {
         }, 0);
         // Calculate VAT (19% of total amount)
         this.vatAmount = this.totalAmount * this.vatRatePermille / 1000;
+        this.totalAmountWithVat = this.totalAmount + this.vatAmount;
     }
     
     // Generate invoice hash (matching frontend implementation)
