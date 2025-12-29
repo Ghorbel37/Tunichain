@@ -349,6 +349,7 @@ async function savePaymentEventToDatabase(eventData) {
     // console.warn(`   Payment must be created via API first before blockchain events can update it.`);
     return null;
   }
+}
 
 /**
  * Initialize blockchain event listener for PaymentStored events
