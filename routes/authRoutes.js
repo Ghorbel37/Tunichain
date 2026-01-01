@@ -1,6 +1,7 @@
 // routes/authRoutes.js
 import express from "express";
 import { SiweMessage, generateNonce } from "siwe";
+import { utils } from "ethers";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { authMiddleware } from "../middleware/auth.js";
@@ -13,11 +14,11 @@ const JWT_SECRET = process.env.JWT_SECRET || "dev_secret";
 const nonces = new Map();
 
 /**
- * @route   GET /api/auth/nonce
- * @desc    Generate nonce for SIWE message (only for registered users)
+ * @route   GET /api/auth/message
+ * @desc    Generate full SIWE message for signing
  * @access  Public
  */
-router.get("/nonce", async (req, res) => {
+router.get("/message", async (req, res) => {
     try {
         const { address } = req.query;
 
@@ -40,13 +41,30 @@ router.get("/nonce", async (req, res) => {
         // Generate nonce
         const nonce = generateNonce();
 
+        // Create SIWE message
+        const frontend_domain = process.env.FRONTEND_DOMAIN || "localhost";
+        const appName = process.env.APP_NAME || "Tunichain";
+        const frontend_uri = process.env.FRONTEND_URI || `http://${frontend_domain}`;
+        const chainId = process.env.CHAIN_ID || 1;
+        const message = new SiweMessage({
+            domain: frontend_domain,
+            address: utils.getAddress(normalizedAddress),
+            statement: `Sign in to ${appName}`,
+            uri: frontend_uri,
+            version: "1",
+            chainId: chainId,
+            nonce,
+            issuedAt: new Date().toISOString()
+        });
+
         // Store nonce with address for verification
         nonces.set(nonce, { address: normalizedAddress, createdAt: Date.now() });
 
         // Cleanup nonce after 5 minutes
         setTimeout(() => nonces.delete(nonce), 5 * 60 * 1000);
 
-        res.json({ nonce });
+        // Return the full message to be signed
+        res.json({ message: message.prepareMessage() });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
