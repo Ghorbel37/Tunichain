@@ -1,91 +1,62 @@
-require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const { SiweMessage } = require('siwe');
-const jwt = require('jsonwebtoken');
+import express from "express";
+import cors from "cors";
+import sellerRoutes from "./routes/sellerRoutes.js";
+import invoiceRoutes from "./routes/invoiceRoutes.js";
+import bankRoutes from "./routes/bankRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import { USER_ROLES } from "./models/Roles.js";
+import { authMiddleware } from "./middleware/auth.js";
+import { requireRoles } from "./middleware/rbac.js";
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerFile from './swagger/swagger-output.json' with { type: 'json' };
 
-// Express app
 const app = express();
+
 app.use(cors({ origin: '*', credentials: true }));
-app.use(bodyParser.json());
+app.use(express.json());
 
-// Config
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret';
-const APP_NAME = process.env.APP_NAME || 'MyDapp';
-const DOMAIN = process.env.DOMAIN || 'localhost:4000';
+// API routes
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/sellers", sellerRoutes);
+app.use("/api/invoices", invoiceRoutes);
+app.use("/api/banks", bankRoutes);
+app.use("/api/payments", paymentRoutes);
 
-
-
-// Simple in-memory nonces for demo (use DB or Redis in prod)
-const nonces = new Map();
-
-// 1) Request nonce
-app.get('/nonce', (req, res) => {
-    const nonce = (Math.random().toString(36) + Date.now().toString(36)).slice(2, 12);
-    // for demo store ephemeral; associate with nothing — SIWE message contains it
-    nonces.set(nonce, true);
-    // cleanup optionally after some time
-    setTimeout(() => nonces.delete(nonce), 5 * 60 * 1000);
-    res.json({ nonce });
-});
-
-// 2) Verify signature and issue JWT
-app.post('/verify', async (req, res) => {
-    try {
-        const { message, signature } = req.body;
-        if (!message || !signature) {
-            return res.status(400).json({ error: 'Missing message or signature' });
-        }
-
-        // ✅ Pass object directly
-        const siweMessage = new SiweMessage(message);
-        const fields = await siweMessage.validate(signature);
-
-        if (!nonces.has(fields.nonce)) {
-            return res.status(400).json({ error: 'Invalid or expired nonce' });
-        }
-
-        const payload = { address: fields.address };
-        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
-
-        nonces.delete(fields.nonce);
-
-        return res.json({ token });
-    } catch (err) {
-        console.error(err);
-        return res.status(400).json({ error: 'Invalid SIWE message or signature' });
+// ============================================
+// EXAMPLE: Protected endpoint with RBAC
+// ============================================
+// Only taxAdministration and superAdmin can access this endpoint
+app.get("/api/admin/stats",
+    authMiddleware,
+    requireRoles(USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN),
+    (req, res) => {
+        res.json({
+            message: "Admin stats endpoint",
+            user: req.user,
+            accessedAt: new Date().toISOString()
+        });
     }
-});
-
-
-
-// 3) Protected endpoint example
-function authMiddleware(req, res, next) {
-    const auth = req.headers.authorization;
-    if (!auth) return res.status(401).json({ error: 'No token' });
-    const token = auth.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        req.user = decoded;
-        next();
-    } catch (err) {
-        return res.status(401).json({ error: 'Invalid token' });
-    }
-}
-
-app.get('/me', authMiddleware, (req, res) => {
-    res.json({ address: req.user.address });
-});
-
-
+);
 
 // Swagger setup
-const swaggerUi = require('swagger-ui-express');
-const swaggerFile = require('./swagger/swagger-output.json');
+const options = {
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "Bank API",
+            version: "1.0.0",
+            description: "API documentation for managing banks",
+        },
+        servers: [{ url: "http://localhost:4000" }],
+    },
+    apis: ["./routes/*.js"], // path to your annotated route files
+};
 
+const specs = swaggerJsdoc(options);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-// Start server
-const PORT = 4000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+export default app;
