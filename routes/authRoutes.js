@@ -1,6 +1,6 @@
 // routes/authRoutes.js
 import express from "express";
-import { SiweMessage } from "siwe";
+import { SiweMessage, generateNonce } from "siwe";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { authMiddleware } from "../middleware/auth.js";
@@ -38,7 +38,7 @@ router.get("/nonce", async (req, res) => {
         }
 
         // Generate nonce
-        const nonce = (Math.random().toString(36) + Date.now().toString(36)).slice(2, 12);
+        const nonce = generateNonce();
 
         // Store nonce with address for verification
         nonces.set(nonce, { address: normalizedAddress, createdAt: Date.now() });
