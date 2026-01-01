@@ -10,6 +10,9 @@
     "dev": "node index.js",
     "start": "node index.js",
     "server": "node server.js",
+    "clear:db": "node scripts/clearDB.js",
+    "init:db": "node scripts/initDB.js",
+    "reset:db": "npm run clear:db -- -y && npm run init:db",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
