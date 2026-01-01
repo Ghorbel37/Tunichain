@@ -7,8 +7,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "node index.js",
-    "start": "node index.js",
+    "start": "node server.js",
     "server": "node server.js",
     "clear:db": "node scripts/clearDB.js",
     "init:db": "node scripts/initDB.js",
