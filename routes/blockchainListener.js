@@ -54,7 +54,7 @@ export function initBankAddedListener(rpcUrl, registryAddress) {
   try {
     // Create provider
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-    
+
     // Create contract instance
     const registryContract = new ethers.Contract(
       registryAddress,
@@ -62,7 +62,7 @@ export function initBankAddedListener(rpcUrl, registryAddress) {
       provider
     );
 
-    console.log(`Blockchain listener initialized for contract: ${registryAddress} \nListening for BankAdded events`);
+    console.log(`Blockchain listener initialized for contract: ${registryAddress} --- Listening for BankAdded events`);
 
     // Listen for BankAdded events
     registryContract.on("BankAdded", async (bank, meta, event) => {
@@ -80,14 +80,14 @@ export function initBankAddedListener(rpcUrl, registryAddress) {
       //   logIndex: event.logIndex,
       //   transactionIndex: event.transactionIndex
       // });
-      
+
       // Get block timestamp
       try {
         const block = await provider.getBlock(event.blockNumber);
         const blockTimestamp = new Date(block.timestamp * 1000);
-        
+
         // console.log("Block Timestamp:", blockTimestamp);
-        
+
         // Update database with blockchain event data
         await saveBankEventToDatabase({
           walletAddress: bank.toLowerCase(),
@@ -98,7 +98,7 @@ export function initBankAddedListener(rpcUrl, registryAddress) {
       } catch (dbError) {
         // console.error("Failed to save to database:", dbError.message);
       }
-      
+
       // console.log("====================================\n");
     });
 
@@ -167,7 +167,7 @@ export function initSellerAddedListener(rpcUrl, registryAddress) {
   try {
     // Create provider
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-    
+
     // Create contract instance
     const registryContract = new ethers.Contract(
       registryAddress,
@@ -175,12 +175,12 @@ export function initSellerAddedListener(rpcUrl, registryAddress) {
       provider
     );
 
-    console.log(`Blockchain listener initialized for contract: ${registryAddress} \nListening for SellerAdded events`);
+    console.log(`Blockchain listener initialized for contract: ${registryAddress} --- Listening for SellerAdded events`);
 
     // Listen for SellerAdded events
     registryContract.on("SellerAdded", async (seller, meta, event) => {
-      
-      try {        
+
+      try {
         // Update database with blockchain event data
         await saveSellerEventToDatabase({
           walletAddress: seller.toLowerCase(),
@@ -191,7 +191,7 @@ export function initSellerAddedListener(rpcUrl, registryAddress) {
       } catch (dbError) {
         console.error("Failed to save to database");
       }
-      
+
     });
 
     // Handle provider errors
@@ -261,7 +261,7 @@ export function initInvoiceStoredListener(rpcUrl, invoiceValidationAddress) {
   try {
     // Create provider
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-    
+
     // Create contract instance
     const invoiceContract = new ethers.Contract(
       invoiceValidationAddress,
@@ -269,16 +269,16 @@ export function initInvoiceStoredListener(rpcUrl, invoiceValidationAddress) {
       provider
     );
 
-    console.log(`Blockchain listener initialized for contract: ${invoiceValidationAddress} \nListening for InvoiceStored events`);
+    console.log(`Blockchain listener initialized for contract: ${invoiceValidationAddress} --- Listening for InvoiceStored events`);
 
     // Listen for InvoiceStored events
     // event InvoiceStored(uint256 indexed id, address indexed seller, bytes32 hash, uint256 amount, uint256 vatRatePermille, uint256 vatAmount)
     invoiceContract.on("InvoiceStored", async (id, seller, hash, amount, vatRatePermille, vatAmount, event) => {
-      
-      try {        
+
+      try {
         // Convert bytes32 hash to hex string
         const invoiceHash = hash;
-        
+
         // Update database with blockchain event data
         await saveInvoiceEventToDatabase({
           invoiceId: id.toNumber(),
@@ -290,7 +290,7 @@ export function initInvoiceStoredListener(rpcUrl, invoiceValidationAddress) {
       } catch (dbError) {
         console.error("Failed to save invoice to database");
       }
-      
+
     });
 
     // Handle provider errors
@@ -360,7 +360,7 @@ export function initPaymentStoredListener(rpcUrl, paymentRegistryAddress) {
   try {
     // Create provider
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-    
+
     // Create contract instance
     const paymentContract = new ethers.Contract(
       paymentRegistryAddress,
@@ -368,13 +368,13 @@ export function initPaymentStoredListener(rpcUrl, paymentRegistryAddress) {
       provider
     );
 
-    console.log(`Blockchain listener initialized for contract: ${paymentRegistryAddress} \nListening for PaymentStored events`);
+    console.log(`Blockchain listener initialized for contract: ${paymentRegistryAddress} --- Listening for PaymentStored events`);
 
     // Listen for PaymentStored events
     // event PaymentStored(uint256 indexed id, address indexed bank, uint256 invoiceId, bytes32 paymentHash, uint256 amountPaid)
     paymentContract.on("PaymentStored", async (id, bank, invoiceId, paymentHash, amountPaid, event) => {
-      
-      try {        
+
+      try {
         // Update database with blockchain event data
         await savePaymentEventToDatabase({
           paymentId: id.toNumber(),
@@ -386,7 +386,7 @@ export function initPaymentStoredListener(rpcUrl, paymentRegistryAddress) {
       } catch (dbError) {
         console.error("Failed to save payment to database");
       }
-      
+
     });
 
     // Handle provider errors
