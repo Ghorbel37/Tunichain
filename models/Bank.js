@@ -5,6 +5,7 @@ const bankSchema = new mongoose.Schema({
     name: { type: String, required: true },
     bicCode: { type: String, required: true, unique: true }, // Bank Identifier Code
     address: { type: String, required: false, index: true, lowercase: true, unique: true }, //Wallet address
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     registeredAt: { type: Date, default: Date.now },
     isActive: { type: Boolean, default: true },
     blockchain: {

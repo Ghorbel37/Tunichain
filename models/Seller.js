@@ -5,6 +5,7 @@ const sellerSchema = new mongoose.Schema({
     name: { type: String, required: true },
     taxId: { type: String, required: true, unique: true },
     address: { type: String, required: false, index: true, lowercase: true, unique: true }, // Wallet address
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     email: { type: String },
     registeredAt: { type: Date, default: Date.now },
     isActive: { type: Boolean, default: true },
