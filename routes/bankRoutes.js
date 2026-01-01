@@ -1,6 +1,8 @@
 // routes/bankRoutes.js
 import express from "express";
 import Bank from "../models/Bank.js";
+import User from "../models/User.js";
+import { USER_ROLES } from "../models/Roles.js";
 
 const router = express.Router();
 
@@ -13,13 +15,33 @@ router.post("/", async (req, res) => {
     try {
         const { name, bicCode, address } = req.body;
 
+        if (!address) {
+            return res.status(400).json({ message: "Wallet address is required" });
+        }
+
         // Check if bank already exists
         const existing = await Bank.findOne({ bicCode });
         if (existing) {
             return res.status(400).json({ message: "Bank already registered" });
         }
 
-        const bank = new Bank({ name, bicCode, address });
+        // Check if user already exists
+        let user = await User.findOne({ address: address.toLowerCase() });
+        if (!user) {
+            // Create user with 'bank' role
+            user = new User({
+                address: address,
+                role: USER_ROLES.BANK
+            });
+            await user.save();
+        }
+
+        const bank = new Bank({
+            name,
+            bicCode,
+            address: address,
+            user: user._id
+        });
         await bank.save();
 
         res.status(201).json(bank);
