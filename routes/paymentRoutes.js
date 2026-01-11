@@ -2,19 +2,40 @@
 import express from "express";
 import PaymentProof from "../models/PaymentProof.js";
 import Invoice from "../models/Invoice.js";
+import Bank from "../models/Bank.js";
+import { authMiddleware } from "../middleware/auth.js";
+import { requireRoles } from "../middleware/rbac.js";
+import { USER_ROLES } from "../models/Roles.js";
 
 const router = express.Router();
 
 // Add a payment proof
-router.post("/", async (req, res) => {
+// Banks can create payment proofs for themselves
+// Tax admin and superAdmin can create payment proofs for any bank
+router.post("/", authMiddleware, requireRoles(USER_ROLES.BANK, USER_ROLES.SUPER_ADMIN), async (req, res) => {
     try {
-        const { bank, invoice, amountPaid, paymentReference } = req.body;
+        let bankId = req.body.bank;
 
-        const proof = new PaymentProof(req.body);
+        // If user is a bank, automatically use their bank account
+        if (req.user.role === USER_ROLES.BANK) {
+            const bank = await Bank.findOne({ address: req.user.address });
+            if (!bank) {
+                return res.status(404).json({ message: "Bank account not found for this user" });
+            }
+            bankId = bank._id;
+        }
+
+        // For superAdmin, bank must be provided in request body
+        if (!bankId && req.user.role === USER_ROLES.SUPER_ADMIN) {
+            return res.status(400).json({ message: "Bank ID is required" });
+        }
+
+        const paymentData = { ...req.body, bank: bankId };
+        const proof = new PaymentProof(paymentData);
         await proof.save();
 
         // Update invoice status
-        await Invoice.findByIdAndUpdate(invoice, { status: "paid" });
+        await Invoice.findByIdAndUpdate(req.body.invoice, { status: "paid" });
 
         // Re-fetch with population to include related docs and ensure paymentHash is present
         const saved = await PaymentProof.findById(proof._id)
