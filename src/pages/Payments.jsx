@@ -188,7 +188,7 @@ export default function Payments() {
     <Box sx={{ maxWidth: 1100, mx: "auto", mt: 4 }}>
       <Typography variant="h5" gutterBottom>Payment Receipts</Typography>
       {/* Payment form */}
-      <Box component="form" onSubmit={handleSubmit} sx={{ mb: 3, p: 2, background: '#fafafa', borderRadius: 2 }}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ mb: 3, p: 2, borderRadius: 2 }}>
         <TextField
           select
           label="Bank"
