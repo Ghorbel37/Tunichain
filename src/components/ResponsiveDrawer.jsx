@@ -18,8 +18,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { Toolbar } from "@mui/material";
+import { useAuth } from "../context/AuthContext";
+import { ROLE_PERMISSIONS } from "./ProtectedRoute";
 
-const navItems = [
+const allNavItems = [
     { text: "Home", icon: <HomeIcon />, path: "/" },
     { text: "Banks", icon: <AccountBalanceIcon />, path: "/banks" },
     { text: "Sellers", icon: <SellIcon />, path: "/sellers" },
@@ -34,6 +36,21 @@ export default function ResponsiveDrawer({ drawerWidth, mobileOpen, onMobileTogg
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
     const navigate = useNavigate();
     const location = useLocation();
+    const { user } = useAuth();
+
+    // Filter nav items based on user role
+    const navItems = React.useMemo(() => {
+        if (!user || !user.role) {
+            return allNavItems; // Show all if no role (shouldn't happen when authenticated)
+        }
+
+        const allowedPaths = ROLE_PERMISSIONS[user.role] || [];
+        return allNavItems.filter((item) =>
+            allowedPaths.some(
+                (allowedPath) => item.path === allowedPath || item.path.startsWith(allowedPath + '/')
+            )
+        );
+    }, [user]);
 
     const drawerContent = (
         <Box sx={{ width: drawerWidth }}>
@@ -44,7 +61,10 @@ export default function ResponsiveDrawer({ drawerWidth, mobileOpen, onMobileTogg
                     <ListItem key={item.text} disablePadding>
                         <ListItemButton
                             selected={location.pathname === item.path}
-                            onClick={() => navigate(item.path)}
+                            onClick={() => {
+                                navigate(item.path);
+                                if (isMobile) onMobileToggle();
+                            }}
                         >
                             <ListItemIcon>{item.icon}</ListItemIcon>
                             <ListItemText primary={item.text} />
