@@ -1,12 +1,12 @@
-
-
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { getTheme } from "./theme";
 
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import App from "./App";
 import Home from "./pages/Home";
@@ -18,36 +18,64 @@ import Invoices from "./pages/Invoices";
 import Payments from "./pages/Payments";
 import Login from "./pages/Login";
 
+// Login wrapper to handle navigation after successful login
+function LoginPage() {
+  const navigate = useNavigate();
+  const { isAuthenticated, getDefaultRoute } = useAuth();
+
+  // If already authenticated, redirect to default route
+  if (isAuthenticated) {
+    return <Navigate to={getDefaultRoute()} replace />;
+  }
+
+  const handleLoginSuccess = (redirectPath) => {
+    navigate(redirectPath || '/', { replace: true });
+  };
+
+  return <Login onLoginSuccess={handleLoginSuccess} />;
+}
+
+function AppRoutes({ mode, setMode }) {
+  return (
+    <Routes>
+      {/* Public route - Login */}
+      <Route path="/login" element={<LoginPage />} />
+
+      {/* Protected routes */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <App mode={mode} setMode={setMode} />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Home />} />
+        <Route path="about" element={<About />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="banks" element={<Banks />} />
+        <Route path="sellers" element={<Sellers />} />
+        <Route path="invoices" element={<Invoices />} />
+        <Route path="payments" element={<Payments />} />
+      </Route>
+
+      {/* Catch-all redirect */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
 
 function Root() {
   const [mode, setMode] = useState('light');
-  const [address, setAddress] = useState(null);
   const theme = getTheme(mode);
-
-  if (!address) {
-    return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Login onLogin={setAddress} />
-      </ThemeProvider>
-    );
-  }
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<App mode={mode} setMode={setMode} address={address} />}>
-            <Route index element={<Home />} />
-            <Route path="about" element={<About />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="banks" element={<Banks />} />
-            <Route path="sellers" element={<Sellers />} />
-            <Route path="invoices" element={<Invoices />} />
-            <Route path="payments" element={<Payments />} />
-          </Route>
-        </Routes>
+        <AuthProvider>
+          <AppRoutes mode={mode} setMode={setMode} />
+        </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>
   );
