@@ -9,6 +9,31 @@ import { USER_ROLES } from "../models/Roles.js";
 
 const router = express.Router();
 
+// Get all payments (role-aware)
+// Banks see only their own payments
+// Tax admin and superAdmin see all payments
+router.get("/", authMiddleware, requireRoles(USER_ROLES.BANK, USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN), async (req, res) => {
+    try {
+        let query = {};
+
+        // If user is a bank, filter by their bank account
+        if (req.user.role === USER_ROLES.BANK) {
+            const bank = await Bank.findOne({ address: req.user.address });
+            if (!bank) {
+                return res.status(404).json({ message: "Bank account not found for this user" });
+            }
+            query.bank = bank._id;
+        }
+
+        const payments = await PaymentProof.find(query)
+            .populate("bank")
+            .populate("invoice");
+        res.json(payments);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // Add a payment proof
 // Banks can create payment proofs for themselves
 // Tax admin and superAdmin can create payment proofs for any bank
