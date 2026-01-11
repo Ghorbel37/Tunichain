@@ -24,6 +24,8 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'column',
+    alignItems: 'stretch',
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -32,7 +34,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })
     [theme.breakpoints.down('md')]: {
       marginLeft: 0,
     },
-    pt: `${theme.mixins.toolbar?.minHeight || 64}px`,
+    paddingTop: `${theme.mixins.toolbar?.minHeight || 64}px`,
   }));
 
 const AppBar = styled(MuiAppBar, {
