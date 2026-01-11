@@ -10,7 +10,6 @@ import { USER_ROLES } from "./models/Roles.js";
 import { authMiddleware } from "./middleware/auth.js";
 import { requireRoles } from "./middleware/rbac.js";
 import swaggerUi from 'swagger-ui-express';
-import swaggerJsdoc from "swagger-jsdoc";
 import swaggerFile from './swagger/swagger-output.json' with { type: 'json' };
 
 const app = express();
@@ -43,20 +42,6 @@ app.get("/api/admin/stats",
 );
 
 // Swagger setup
-const options = {
-    definition: {
-        openapi: "3.0.0",
-        info: {
-            title: "Bank API",
-            version: "1.0.0",
-            description: "API documentation for managing banks",
-        },
-        servers: [{ url: "http://localhost:4000" }],
-    },
-    apis: ["./routes/*.js"], // path to your annotated route files
-};
-
-const specs = swaggerJsdoc(options);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 export default app;
