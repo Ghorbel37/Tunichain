@@ -30,8 +30,8 @@ const doc = {
 };
 
 const outputFile = './swagger-output.json';
-const endpointsFiles = ['../index.js']; // or routes folder
+const endpointsFiles = ['../../index.js']; // or routes folder
 
 swaggerAutogen({ openapi: '3.0.0' })(outputFile, endpointsFiles, doc).then(async () => {
-    await import('../server.js'); // start your server after docs generation
+    await import('../../server.js'); // start your server after docs generation
 });

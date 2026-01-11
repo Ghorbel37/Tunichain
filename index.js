@@ -10,7 +10,7 @@ import { USER_ROLES } from "./models/Roles.js";
 import { authMiddleware } from "./middleware/auth.js";
 import { requireRoles } from "./middleware/rbac.js";
 import swaggerUi from 'swagger-ui-express';
-import swaggerFile from './swagger/swagger-output.json' with { type: 'json' };
+import swaggerFile from './scripts/swagger/swagger-output.json' with { type: 'json' };
 
 const app = express();
 

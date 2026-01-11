@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node server.js",
     "server": "node server.js",
-    "swagger": "node swagger/swagger_generate_json.js",
+    "swagger": "node scripts/swagger/swagger_generate_json.js",
     "clear:db": "node scripts/clearDB.js",
     "init:db": "node scripts/initDB.js",
     "reset:db": "npm run clear:db -- -y && npm run init:db",
