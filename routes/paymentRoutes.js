@@ -56,4 +56,25 @@ router.get("/bank/:bankId", async (req, res) => {
     res.json(payments);
 });
 
+// Get all payment receipts related to a specific seller
+// Accessible by tax admin and superAdmin
+router.get("/seller/:sellerId", authMiddleware, requireRoles(USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN), async (req, res) => {
+    try {
+        const { sellerId } = req.params;
+
+        // Find all invoices for this seller
+        const invoices = await Invoice.find({ seller: sellerId });
+        const invoiceIds = invoices.map(inv => inv._id);
+
+        // Find all payments for these invoices
+        const payments = await PaymentProof.find({ invoice: { $in: invoiceIds } })
+            .populate("bank")
+            .populate("invoice");
+
+        res.json(payments);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 export default router;
