@@ -8,6 +8,29 @@ import { USER_ROLES } from "../models/Roles.js";
 
 const router = express.Router();
 
+// Get all invoices (role-aware)
+// Sellers see only their own invoices
+// Tax admin and superAdmin see all invoices
+router.get("/", authMiddleware, requireRoles(USER_ROLES.SELLER, USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN), async (req, res) => {
+    try {
+        let query = {};
+
+        // If user is a seller, filter by their seller account
+        if (req.user.role === USER_ROLES.SELLER) {
+            const seller = await Seller.findOne({ address: req.user.address });
+            if (!seller) {
+                return res.status(404).json({ message: "Seller account not found for this user" });
+            }
+            query.seller = seller._id;
+        }
+
+        const invoices = await Invoice.find(query).populate("seller");
+        res.json(invoices);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // Create an invoice
 // Sellers can create invoices for themselves
 // Tax admin and superAdmin can create invoices for any seller
