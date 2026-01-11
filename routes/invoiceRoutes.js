@@ -45,9 +45,22 @@ router.get("/seller/:sellerId", async (req, res) => {
 });
 
 // Get all unpaid invoices
-router.get("/unpaid", async (req, res) => {
+// Sellers see only their own unpaid invoices
+// Banks, Tax admin and superAdmin see all unpaid invoices
+router.get("/unpaid", authMiddleware, async (req, res) => {
     try {
-        const unpaidInvoices = await Invoice.find({ status: "unpaid" }).populate("seller");
+        let query = { status: "unpaid" };
+
+        // If user is a seller, filter by their seller account
+        if (req.user.role === USER_ROLES.SELLER) {
+            const seller = await Seller.findOne({ address: req.user.address });
+            if (!seller) {
+                return res.status(404).json({ message: "Seller account not found for this user" });
+            }
+            query.seller = seller._id;
+        }
+
+        const unpaidInvoices = await Invoice.find(query).populate("seller");
         res.json(unpaidInvoices);
     } catch (err) {
         res.status(500).json({ message: err.message });
