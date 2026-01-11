@@ -40,10 +40,17 @@ export default function Payments() {
 
   // Fetch payments for selected bank
   useEffect(() => {
-    if (!selectedBank) return;
-    apiClient.get(`/api/payments/bank/${selectedBank}`)
-      .then(setPayments)
-      .catch(() => setPayments([]));
+    if (selectedBank) {
+      if (selectedBank === "all") {
+        apiClient.get(`/api/payments`)
+          .then(setPayments)
+          .catch(() => setPayments([]));
+      } else {
+        apiClient.get(`/api/payments/bank/${selectedBank}`)
+          .then(setPayments)
+          .catch(() => setPayments([]));
+      }
+    }
   }, [selectedBank]);
 
   const handleFormChange = (e) => {
@@ -149,9 +156,15 @@ export default function Payments() {
 
       // Refresh payments if a bank is selected in the filter
       if (selectedBank) {
-        apiClient.get(`/api/payments/bank/${selectedBank}`)
-          .then(setPayments)
-          .catch(() => setPayments([]));
+        if (selectedBank === "all") {
+          apiClient.get(`/api/payments`)
+            .then(setPayments)
+            .catch(() => setPayments([]));
+        } else {
+          apiClient.get(`/api/payments/bank/${selectedBank}`)
+            .then(setPayments)
+            .catch(() => setPayments([]));
+        }
       }
 
       setForm(f => ({
@@ -252,7 +265,7 @@ export default function Payments() {
           onChange={handleFilterBankChange}
           sx={{ minWidth: 250, mr: 2 }}
         >
-          <MenuItem value="">All Banks</MenuItem>
+          <MenuItem key="all" value="all">All Banks</MenuItem>
           {banks.map(bank => (
             <MenuItem key={bank._id} value={bank._id}>{bank.name}</MenuItem>
           ))}

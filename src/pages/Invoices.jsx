@@ -36,10 +36,17 @@ export default function Invoices() {
 
   // Fetch invoices for selected seller
   useEffect(() => {
-    if (!selectedSeller) return;
-    apiClient.get(`/api/invoices/seller/${selectedSeller}`)
-      .then(setInvoices)
-      .catch(() => setInvoices([]));
+    if (selectedSeller) {
+      if (selectedSeller === "all") {
+        apiClient.get('/api/invoices')
+          .then(setInvoices)
+          .catch(() => setInvoices([]));
+      } else {
+        apiClient.get(`/api/invoices/seller/${selectedSeller}`)
+          .then(setInvoices)
+          .catch(() => setInvoices([]));
+      }
+    }
   }, [selectedSeller]);
 
   const handleFormChange = (e) => {
@@ -105,13 +112,11 @@ export default function Invoices() {
       }));
 
       // Backend API call first - backend will listen for blockchain event
-      const res = await apiClient.post('/api/invoices', {
+      const invoiceData = await apiClient.post('/api/invoices', {
         ...form,
         items: invoiceItems,
         vatRatePermille: parseInt(form.vatRate, 10)
       });
-      if (!res.ok) throw new Error("Failed to add invoice");
-      const invoiceData = await res.json();
       // Showing invoice data returned from backend for debugging
       // console.log("Invoice added in backend:", invoiceData);
 
@@ -128,7 +133,7 @@ export default function Invoices() {
       // Use backend's calculated hash and total amount
       const invoiceHash = invoiceData.invoiceHash;
       const totalAmountBN = ethers.BigNumber.from(invoiceData.totalAmount.toString());
-      const vatRatePermille = parseInt(form.vatRate, 10);
+      const vatRatePermille = invoiceData.vatRatePermille;
 
       const tx = await contract.submitInvoice(invoiceHash, totalAmountBN, vatRatePermille);
       const receipt = await tx.wait();
@@ -142,9 +147,15 @@ export default function Invoices() {
 
       // Refresh invoices if a seller is selected in the filter
       if (selectedSeller) {
-        apiClient.get(`/api/invoices/seller/${selectedSeller}`)
-          .then(setInvoices)
-          .catch(() => setInvoices([]));
+        if (selectedSeller === "all") {
+          apiClient.get('/api/invoices')
+            .then(setInvoices)
+            .catch(() => setInvoices([]));
+        } else {
+          apiClient.get(`/api/invoices/seller/${selectedSeller}`)
+            .then(setInvoices)
+            .catch(() => setInvoices([]));
+        }
       }
 
       setForm(f => ({
@@ -260,7 +271,7 @@ export default function Invoices() {
           onChange={handleFilterSellerChange}
           sx={{ minWidth: 250, mr: 2 }}
         >
-          <MenuItem value="">All Sellers</MenuItem>
+          <MenuItem key="all" value="all">All Sellers</MenuItem>
           {sellers.map(seller => (
             <MenuItem key={seller._id} value={seller._id}>{seller.name}</MenuItem>
           ))}
