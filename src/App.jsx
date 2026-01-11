@@ -34,7 +34,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })
     [theme.breakpoints.down('md')]: {
       marginLeft: 0,
     },
-    paddingTop: `${theme.mixins.toolbar?.minHeight || 64}px`,
+    paddingTop: `${theme.mixins.toolbar?.minHeight || 56}px`,
   }));
 
 const AppBar = styled(MuiAppBar, {
