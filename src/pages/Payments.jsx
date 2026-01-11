@@ -188,7 +188,7 @@ export default function Payments() {
     <Box sx={{ maxWidth: 1100, mx: "auto", mt: 4 }}>
       <Typography variant="h5" gutterBottom>Payment Receipts</Typography>
       {/* Payment form */}
-      <Box component="form" onSubmit={handleSubmit} sx={{ mb: 3, p: 2, borderRadius: 2 }}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', mb: 3, p: 2, borderRadius: 2, gap: 2, flexWrap: 'wrap' }}>
         <TextField
           select
           label="Bank"
@@ -250,11 +250,13 @@ export default function Payments() {
           onChange={handleFormChange}
           sx={{ mr: 2 }}
         />
-        <Button type="submit" variant="contained" color="primary">Add Payment</Button>
-        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
       </Box>
-      <Divider sx={{ mb: 2 }} />
+
+      <Button type="submit" variant="contained" color="primary">Add Payment</Button>
+      {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+      {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
+
+      <Divider sx={{ mt: 3, mb: 3 }} />
       <Typography variant="h6" sx={{ mb: 2 }}>Payments for Selected Bank</Typography>
       {/* Bank filter menu above the table */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
