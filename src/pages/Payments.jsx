@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Typography, TextField, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert, MenuItem, Divider, TablePagination } from "@mui/material";
 import { ethers } from "ethers";
 import PaymentRegistryABI from "../abi/PaymentRegistry.json";
+import { apiClient } from "../utils/apiClient";
 
 // Read contract address from .env
 const PAYMENT_REGISTRY_ADDRESS = import.meta.env.VITE_PAYMENT_REGISTRY_ADDRESS;
@@ -29,12 +30,10 @@ export default function Payments() {
 
   // Fetch banks and invoices for dropdowns
   useEffect(() => {
-    fetch(`${BACKEND_URL}/api/banks`)
-      .then(res => res.json())
+    apiClient.get('/api/banks')
       .then(setBanks)
       .catch(() => setBanks([]));
-    fetch(`${BACKEND_URL}/api/invoices/unpaid`)
-      .then(res => res.json())
+    apiClient.get('/api/invoices/unpaid')
       .then(setInvoices)
       .catch(() => setInvoices([]));
   }, []);
@@ -42,8 +41,7 @@ export default function Payments() {
   // Fetch payments for selected bank
   useEffect(() => {
     if (!selectedBank) return;
-    fetch(`${BACKEND_URL}/api/payments/bank/${selectedBank}`)
-      .then(res => res.json())
+    apiClient.get(`/api/payments/bank/${selectedBank}`)
       .then(setPayments)
       .catch(() => setPayments([]));
   }, [selectedBank]);
@@ -90,16 +88,10 @@ export default function Payments() {
       const amountPaidInteger = Math.round(parseFloat(form.amountPaid) * 1000);
 
       // Backend API call first - backend will listen for blockchain event
-      const res = await fetch(`${BACKEND_URL}/api/payments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          amountPaid: amountPaidInteger
-        }),
+      const paymentData = await apiClient.post('/api/payments', {
+        ...form,
+        amountPaid: amountPaidInteger
       });
-      if (!res.ok) throw new Error("Failed to add payment receipt");
-      const paymentData = await res.json();
       console.log("Payment added in backend:", paymentData);
 
       // Resolve hashes and amount from backend response
@@ -151,14 +143,13 @@ export default function Payments() {
       }
 
       setSuccess("Payment receipt added and submitted to blockchain successfully");
-      
+
       // Remove the selected invoice from the invoices list
       setInvoices(prev => prev.filter(inv => inv._id !== form.invoice));
-      
+
       // Refresh payments if a bank is selected in the filter
       if (selectedBank) {
-        fetch(`${BACKEND_URL}/api/payments/bank/${selectedBank}`)
-          .then(res => res.json())
+        apiClient.get(`/api/payments/bank/${selectedBank}`)
           .then(setPayments)
           .catch(() => setPayments([]));
       }

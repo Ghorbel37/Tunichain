@@ -3,6 +3,7 @@ import { Divider, Box, TextField, Button, Table, TableBody, TableCell, TableCont
 import SearchIcon from '@mui/icons-material/Search';
 import { ethers } from "ethers";
 import RegistryABI from "../abi/Registry.json";
+import { apiClient } from "../utils/apiClient";
 
 // Read contract address from .env
 const REGISTRY_ADDRESS = import.meta.env.VITE_REGISTRY_ADDRESS;
@@ -24,9 +25,7 @@ export default function Banks() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${BACKEND_URL}/api/banks`);
-      if (!res.ok) throw new Error("Failed to fetch banks");
-      const data = await res.json();
+      const data = await apiClient.get('/api/banks');
       setBanks(data);
     } catch (err) {
       setError(err.message || "Error fetching banks");
@@ -55,12 +54,7 @@ export default function Banks() {
         throw new Error("Invalid Ethereum address provided for address");
       }
       // Backend API call
-      const res = await fetch(`${BACKEND_URL}/api/banks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      if (!res.ok) throw new Error("Failed to add bank");
+      await apiClient.post('/api/banks', form);
       setForm({ name: "", bicCode: "", address: "" });
       setSuccess("Bank added successfully");
       fetchBanks();
@@ -148,13 +142,14 @@ export default function Banks() {
         onChange={e => { setSearch(e.target.value); setPage(0); }}
         sx={{ mb: 2, width: 300 }}
         slotProps={{
-            input: {startAdornment: (
-            <InputAdornment position="start">
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
                 <SearchIcon />
-            </InputAdornment>),
-            },
+              </InputAdornment>),
+          },
         }}
-        />
+      />
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
       <TableContainer component={Paper}>

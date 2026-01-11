@@ -3,6 +3,7 @@ import { Divider, Box, TextField, Button, Table, TableBody, TableCell, TableCont
 import SearchIcon from '@mui/icons-material/Search';
 import { ethers } from "ethers";
 import RegistryABI from "../abi/Registry.json";
+import { apiClient } from "../utils/apiClient";
 
 // Read contract address from .env
 const REGISTRY_ADDRESS = import.meta.env.VITE_REGISTRY_ADDRESS;
@@ -24,9 +25,7 @@ export default function Sellers() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${BACKEND_URL}/api/sellers`);
-      if (!res.ok) throw new Error("Failed to fetch sellers");
-      const data = await res.json();
+      const data = await apiClient.get('/api/sellers');
       setSellers(data);
     } catch (err) {
       setError(err.message || "Error fetching sellers");
@@ -55,12 +54,7 @@ export default function Sellers() {
         throw new Error("Invalid Ethereum address provided for address");
       }
       // Backend API call
-      const res = await fetch(`${BACKEND_URL}/api/sellers`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      if (!res.ok) throw new Error("Failed to add seller");
+      await apiClient.post('/api/sellers', form);
       setForm({ name: "", taxId: "", address: "", email: "" });
       setSuccess("Seller added successfully");
       fetchSellers();

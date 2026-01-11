@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Typography, TextField, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert, MenuItem, Divider, TablePagination, InputAdornment } from "@mui/material";
 import { ethers } from "ethers";
 import InvoiceValidationABI from "../abi/InvoiceValidation.json";
+import { apiClient } from "../utils/apiClient";
 
 // Read contract address from .env
 const INVOICE_VALIDATION_ADDRESS = import.meta.env.VITE_INVOICE_VALIDATION_ADDRESS;
@@ -28,8 +29,7 @@ export default function Invoices() {
 
   // Fetch sellers for dropdown
   useEffect(() => {
-    fetch(`${BACKEND_URL}/api/sellers`)
-      .then(res => res.json())
+    apiClient.get('/api/sellers')
       .then(setSellers)
       .catch(() => setSellers([]));
   }, []);
@@ -37,8 +37,7 @@ export default function Invoices() {
   // Fetch invoices for selected seller
   useEffect(() => {
     if (!selectedSeller) return;
-    fetch(`${BACKEND_URL}/api/invoices/seller/${selectedSeller}`)
-      .then(res => res.json())
+    apiClient.get(`/api/invoices/seller/${selectedSeller}`)
       .then(setInvoices)
       .catch(() => setInvoices([]));
   }, [selectedSeller]);
@@ -106,14 +105,10 @@ export default function Invoices() {
       }));
 
       // Backend API call first - backend will listen for blockchain event
-      const res = await fetch(`${BACKEND_URL}/api/invoices`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          items: invoiceItems,
-          vatRatePermille: parseInt(form.vatRate, 10)
-        }),
+      const res = await apiClient.post('/api/invoices', {
+        ...form,
+        items: invoiceItems,
+        vatRatePermille: parseInt(form.vatRate, 10)
       });
       if (!res.ok) throw new Error("Failed to add invoice");
       const invoiceData = await res.json();
@@ -147,8 +142,7 @@ export default function Invoices() {
 
       // Refresh invoices if a seller is selected in the filter
       if (selectedSeller) {
-        fetch(`${BACKEND_URL}/api/invoices/seller/${selectedSeller}`)
-          .then(res => res.json())
+        apiClient.get(`/api/invoices/seller/${selectedSeller}`)
           .then(setInvoices)
           .catch(() => setInvoices([]));
       }
