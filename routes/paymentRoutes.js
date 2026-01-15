@@ -59,8 +59,7 @@ router.post("/", authMiddleware, requireRoles(USER_ROLES.BANK, USER_ROLES.SUPER_
         const proof = new PaymentProof(paymentData);
         await proof.save();
 
-        // Update invoice status
-        await Invoice.findByIdAndUpdate(req.body.invoice, { status: "paid" });
+
 
         // Re-fetch with population to include related docs and ensure paymentHash is present
         const saved = await PaymentProof.findById(proof._id)

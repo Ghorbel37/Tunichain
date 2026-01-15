@@ -54,4 +54,19 @@ paymentProofSchema.pre('save', async function(next) {
     next();
 });
 
+// Post-save middleware to update Invoice paid status
+paymentProofSchema.post('save', async function (doc) {
+    try {
+        if (doc.invoice) {
+            await Invoice.findByIdAndUpdate(doc.invoice, {
+                paidAt: doc.paidAt || new Date(),
+                status: 'paid'
+            });
+            console.log(`Invoice ${doc.invoice} marked as paid`);
+        }
+    } catch (error) {
+        console.error("Error updating invoice paid status:", error);
+    }
+});
+
 export default mongoose.model("PaymentProof", paymentProofSchema);
