@@ -12,6 +12,7 @@ const ROLE_ROUTES = {
     seller: '/my-invoices',
     taxAdministration: '/tax-invoices',
     superAdmin: '/',
+    ttn: '/tax-invoices',
 };
 
 export function AuthProvider({ children }) {
