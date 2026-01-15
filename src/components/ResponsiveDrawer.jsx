@@ -65,6 +65,7 @@ export default function ResponsiveDrawer({ drawerWidth, mobileOpen, onMobileTogg
             bank: 'Bank',
             seller: 'Seller',
             taxAdministration: 'Tax Admin',
+            ttn: 'TTN',
         };
         return roleMap[role] || role;
     };

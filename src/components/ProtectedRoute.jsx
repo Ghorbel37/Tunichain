@@ -9,6 +9,7 @@ const ROLE_PERMISSIONS = {
     bank: ['/', '/profile', '/my-payments'],
     seller: ['/', '/profile', '/my-invoices'],
     taxAdministration: ['/', '/profile', '/tax-sellers', '/tax-invoices', '/tax-payments', '/tax-seller-report'],
+    ttn: ['/', '/profile', '/tax-sellers', '/tax-invoices', '/tax-payments'],
 };
 
 /**
