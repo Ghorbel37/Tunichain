@@ -18,6 +18,13 @@ import Invoices from "./pages/Invoices";
 import Payments from "./pages/Payments";
 import Login from "./pages/Login";
 
+// Role-specific pages
+import SellerInvoices from "./pages/SellerInvoices";
+import BankPayments from "./pages/BankPayments";
+import TaxSellers from "./pages/TaxSellers";
+import TaxInvoices from "./pages/TaxInvoices";
+import TaxPayments from "./pages/TaxPayments";
+
 // Login wrapper to handle navigation after successful login
 function LoginPage() {
   const navigate = useNavigate();
@@ -53,10 +60,23 @@ function AppRoutes({ mode, setMode }) {
         <Route index element={<Home />} />
         <Route path="about" element={<About />} />
         <Route path="profile" element={<Profile />} />
+
+        {/* SuperAdmin management pages */}
         <Route path="banks" element={<Banks />} />
         <Route path="sellers" element={<Sellers />} />
         <Route path="invoices" element={<Invoices />} />
         <Route path="payments" element={<Payments />} />
+
+        {/* Seller-specific pages */}
+        <Route path="my-invoices" element={<SellerInvoices />} />
+
+        {/* Bank-specific pages */}
+        <Route path="my-payments" element={<BankPayments />} />
+
+        {/* Tax Admin pages */}
+        <Route path="tax-sellers" element={<TaxSellers />} />
+        <Route path="tax-invoices" element={<TaxInvoices />} />
+        <Route path="tax-payments" element={<TaxPayments />} />
       </Route>
 
       {/* Catch-all redirect */}
