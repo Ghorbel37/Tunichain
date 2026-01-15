@@ -61,10 +61,52 @@ router.post("/", authMiddleware, requireRoles(USER_ROLES.SELLER, USER_ROLES.SUPE
     }
 });
 
-// Get invoices for a specific seller
-router.get("/seller/:sellerId", async (req, res) => {
-    const invoices = await Invoice.find({ seller: req.params.sellerId }).populate("seller");
-    res.json(invoices);
+// Get invoices for a specific seller, optionally filtered by month
+// Accessible by tax admin, superAdmin, and the seller themselves
+router.get("/seller/:sellerId", authMiddleware, requireRoles(USER_ROLES.SELLER, USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN), async (req, res) => {
+    try {
+        const { sellerId } = req.params;
+        const { month } = req.query; // Format: YYYY-MM
+
+        // If user is a seller, verify they're requesting their own data
+        if (req.user.role === USER_ROLES.SELLER) {
+            const seller = await Seller.findOne({ address: req.user.address });
+            if (!seller) {
+                return res.status(404).json({ message: "Seller account not found for this user" });
+            }
+            // Ensure seller can only access their own invoices
+            if (seller._id.toString() !== sellerId) {
+                return res.status(403).json({ message: "Access denied: You can only view your own invoices" });
+            }
+        }
+
+        // Build query
+        let query = { seller: sellerId };
+
+        // Add month filter if provided
+        if (month) {
+            // Validate month format (YYYY-MM)
+            const monthRegex = /^\d{4}-\d{2}$/;
+            if (!monthRegex.test(month)) {
+                return res.status(400).json({ message: "Invalid month format. Use YYYY-MM (e.g., 2024-01)" });
+            }
+
+            // Parse month and create date range
+            const [year, monthNum] = month.split('-');
+            const startDate = new Date(year, monthNum - 1, 1);
+            const endDate = new Date(year, monthNum, 0, 23, 59, 59, 999);
+
+            query.issuedAt = {
+                $gte: startDate,
+                $lte: endDate
+            };
+        }
+
+        const invoices = await Invoice.find(query).populate("seller");
+        res.json(invoices);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 });
 
 // Get all unpaid invoices
