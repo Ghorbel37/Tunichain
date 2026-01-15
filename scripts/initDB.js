@@ -5,8 +5,6 @@ import { USER_ROLES } from "../models/Roles.js";
 
 dotenv.config();
 
-const SUPERADMIN_ADDRESS = process.env.SUPERADMIN_ADDRESS.toLowerCase();
-
 const initDB = async () => {
   try {
     // Connect to MongoDB
@@ -14,26 +12,52 @@ const initDB = async () => {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("MongoDB connected");
 
-    // Check if superadmin already exists
-    const existingAdmin = await User.findOne({
-      address: SUPERADMIN_ADDRESS,
-      role: USER_ROLES.SUPER_ADMIN
-    });
+    const usersToInit = [
+      {
+        address: process.env.SUPERADMIN_ADDRESS,
+        role: USER_ROLES.SUPER_ADMIN,
+        name: "Superadmin"
+      },
+      {
+        address: process.env.TAX_ADMININNISTRATION_ADDRESS,
+        role: USER_ROLES.TAX_ADMIN,
+        name: "Tax Administration"
+      },
+      {
+        address: process.env.TTN_ADDRESS,
+        role: USER_ROLES.TTN,
+        name: "TTN"
+      }
+    ];
 
-    if (existingAdmin) {
-      console.log("Superadmin already exists in the database");
-      process.exit(0);
+    for (const userData of usersToInit) {
+      if (!userData.address) {
+        console.warn(`Skipping ${userData.name} because address is not defined in .env`);
+        continue;
+      }
+
+      const address = userData.address.toLowerCase();
+
+      // Check if user already exists
+      const existingUser = await User.findOne({ address });
+
+      if (existingUser) {
+        console.log(`${userData.name} (${address}) already exists in the database with role: ${existingUser.role}`);
+        continue;
+      }
+
+      // Create new user
+      const newUser = new User({
+        address,
+        role: userData.role,
+        isActive: true
+      });
+
+      await newUser.save();
+      console.log(`${userData.name} user created successfully with address: ${address}`);
     }
 
-    // Create new superadmin
-    const superadmin = new User({
-      address: SUPERADMIN_ADDRESS,
-      role: USER_ROLES.SUPER_ADMIN,
-      isActive: true
-    });
-
-    await superadmin.save();
-    console.log("Superadmin user created successfully!");
+    console.log("Database initialization completed.");
     process.exit(0);
   } catch (error) {
     console.error("Error initializing database:", error);
