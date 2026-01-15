@@ -17,7 +17,7 @@ import Box from "@mui/material/Box";
 import { useNavigate, useLocation } from "react-router-dom";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
-import { Toolbar } from "@mui/material";
+import { Toolbar, Typography } from "@mui/material";
 import { useAuth } from "../context/AuthContext";
 import { ROLE_PERMISSIONS } from "./ProtectedRoute";
 
@@ -57,9 +57,31 @@ export default function ResponsiveDrawer({ drawerWidth, mobileOpen, onMobileTogg
         );
     }, [user]);
 
+    // Get role display name
+    const getRoleLabel = (role) => {
+        const roleMap = {
+            superAdmin: 'Admin',
+            bank: 'Bank',
+            seller: 'Seller',
+            taxAdministration: 'Tax Admin',
+        };
+        return roleMap[role] || role;
+    };
+
     const drawerContent = (
         <Box sx={{ width: drawerWidth }}>
-            <Toolbar />
+            {/* <Toolbar /> */}
+            {/* <Divider /> */}
+            {user && (
+                <Box sx={{ px: 2, py: 1.5, bgcolor: 'action.hover', height: '63px' }}>
+                    <Typography variant="caption" color="text.secondary">
+                        Logged in as
+                    </Typography>
+                    <Typography variant="body2" fontWeight="bold">
+                        {getRoleLabel(user.role)}
+                    </Typography>
+                </Box>
+            )}
             <Divider />
             <List>
                 {navItems.map((item) => (
