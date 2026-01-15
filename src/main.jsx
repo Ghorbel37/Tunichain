@@ -24,6 +24,7 @@ import BankPayments from "./pages/BankPayments";
 import TaxSellers from "./pages/TaxSellers";
 import TaxInvoices from "./pages/TaxInvoices";
 import TaxPayments from "./pages/TaxPayments";
+import TaxSellerReport from "./pages/TaxSellerReport";
 
 // Login wrapper to handle navigation after successful login
 function LoginPage() {
@@ -77,6 +78,7 @@ function AppRoutes({ mode, setMode }) {
         <Route path="tax-sellers" element={<TaxSellers />} />
         <Route path="tax-invoices" element={<TaxInvoices />} />
         <Route path="tax-payments" element={<TaxPayments />} />
+        <Route path="tax-seller-report" element={<TaxSellerReport />} />
       </Route>
 
       {/* Catch-all redirect */}

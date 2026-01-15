@@ -32,6 +32,7 @@ const allNavItems = [
     { text: "View Sellers", icon: <SellIcon />, path: "/tax-sellers" },
     { text: "View Invoices", icon: <ReceiptLongIcon />, path: "/tax-invoices" },
     { text: "View Payments", icon: <PaymentIcon />, path: "/tax-payments" },
+    { text: "Seller Reports", icon: <ReceiptLongIcon />, path: "/tax-seller-report" },
     { text: "About", icon: <InfoIcon />, path: "/about" },
     { text: "Profile", icon: <PersonIcon />, path: "/profile" },
 ];
