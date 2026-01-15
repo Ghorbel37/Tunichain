@@ -27,6 +27,11 @@ const allNavItems = [
     { text: "Sellers", icon: <SellIcon />, path: "/sellers" },
     { text: "Invoices", icon: <ReceiptLongIcon />, path: "/invoices" },
     { text: "Payments", icon: <PaymentIcon />, path: "/payments" },
+    { text: "My Invoices", icon: <ReceiptLongIcon />, path: "/my-invoices" },
+    { text: "My Payments", icon: <PaymentIcon />, path: "/my-payments" },
+    { text: "View Sellers", icon: <SellIcon />, path: "/tax-sellers" },
+    { text: "View Invoices", icon: <ReceiptLongIcon />, path: "/tax-invoices" },
+    { text: "View Payments", icon: <PaymentIcon />, path: "/tax-payments" },
     { text: "About", icon: <InfoIcon />, path: "/about" },
     { text: "Profile", icon: <PersonIcon />, path: "/profile" },
 ];
@@ -41,7 +46,7 @@ export default function ResponsiveDrawer({ drawerWidth, mobileOpen, onMobileTogg
     // Filter nav items based on user role
     const navItems = React.useMemo(() => {
         if (!user || !user.role) {
-            return allNavItems; // Show all if no role (shouldn't happen when authenticated)
+            return allNavItems;
         }
 
         const allowedPaths = ROLE_PERMISSIONS[user.role] || [];
