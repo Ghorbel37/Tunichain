@@ -6,10 +6,10 @@ import { CircularProgress, Box } from '@mui/material';
 // Define what routes each role can access
 const ROLE_PERMISSIONS = {
     superAdmin: ['/', '/about', '/profile', '/banks', '/sellers', '/invoices', '/payments', '/my-invoices', '/my-payments', '/tax-sellers', '/tax-invoices', '/tax-payments', '/tax-seller-report'],
-    bank: ['/', '/profile', '/my-payments'],
-    seller: ['/', '/profile', '/my-invoices'],
-    taxAdministration: ['/', '/profile', '/tax-sellers', '/tax-invoices', '/tax-payments', '/tax-seller-report'],
-    ttn: ['/', '/profile', '/tax-sellers', '/tax-invoices', '/tax-payments'],
+    bank: ['/', '/about', '/profile', '/my-payments'],
+    seller: ['/', '/about', '/profile', '/my-invoices'],
+    taxAdministration: ['/', '/about', '/profile', '/tax-sellers', '/tax-invoices', '/tax-payments', '/tax-seller-report'],
+    ttn: ['/', '/about', '/profile', '/tax-sellers', '/tax-invoices', '/tax-payments'],
 };
 
 /**
