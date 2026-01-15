@@ -11,7 +11,7 @@ const router = express.Router();
 // Get all invoices (role-aware)
 // Sellers see only their own invoices
 // Tax admin and superAdmin see all invoices
-router.get("/", authMiddleware, requireRoles(USER_ROLES.SELLER, USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN), async (req, res) => {
+router.get("/", authMiddleware, requireRoles(USER_ROLES.SELLER, USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.TTN), async (req, res) => {
     try {
         let query = {};
 
@@ -63,7 +63,7 @@ router.post("/", authMiddleware, requireRoles(USER_ROLES.SELLER, USER_ROLES.SUPE
 
 // Get invoices for a specific seller, optionally filtered by month
 // Accessible by tax admin, superAdmin, and the seller themselves
-router.get("/seller/:sellerId", authMiddleware, requireRoles(USER_ROLES.SELLER, USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN), async (req, res) => {
+router.get("/seller/:sellerId", authMiddleware, requireRoles(USER_ROLES.SELLER, USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.TTN), async (req, res) => {
     try {
         const { sellerId } = req.params;
         const { month } = req.query; // Format: YYYY-MM

@@ -12,7 +12,7 @@ const router = express.Router();
 // Get all payments (role-aware)
 // Banks see only their own payments
 // Tax admin and superAdmin see all payments
-router.get("/", authMiddleware, requireRoles(USER_ROLES.BANK, USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN), async (req, res) => {
+router.get("/", authMiddleware, requireRoles(USER_ROLES.BANK, USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.TTN), async (req, res) => {
     try {
         let query = {};
 
@@ -82,7 +82,7 @@ router.get("/bank/:bankId", async (req, res) => {
 
 // Get all payment receipts related to a specific seller
 // Accessible by tax admin and superAdmin
-router.get("/seller/:sellerId", authMiddleware, requireRoles(USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN), async (req, res) => {
+router.get("/seller/:sellerId", authMiddleware, requireRoles(USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.TTN), async (req, res) => {
     try {
         const { sellerId } = req.params;
 
