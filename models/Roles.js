@@ -3,4 +3,5 @@ export const USER_ROLES = Object.freeze({
     SELLER: "seller",
     TAX_ADMIN: "taxAdministration",
     SUPER_ADMIN: "superAdmin",
+    TTN: "ttn",
 });
