@@ -19,6 +19,7 @@ function getRoleInfo(role) {
         seller: { label: 'Seller', color: 'success', description: 'Registered seller authorized to create invoices' },
         taxAdministration: { label: 'Tax Administrator', color: 'warning', description: 'Tax authority with read-only access to all records' },
         superAdmin: { label: 'Super Admin', color: 'error', description: 'Full system administrator with all permissions' },
+        ttn: { label: 'TTN', color: 'info', description: 'Digital trade intermediary facilitating electronic document exchange and IT services' },
     };
     return roleMap[role] || { label: role, color: 'default', description: 'Unknown role' };
 }

@@ -24,6 +24,7 @@ function getRoleDisplay(role) {
         seller: 'Seller',
         taxAdministration: 'Tax Admin',
         superAdmin: 'Super Admin',
+        ttn: 'TTN',
     };
     return roleNames[role] || role;
 }
