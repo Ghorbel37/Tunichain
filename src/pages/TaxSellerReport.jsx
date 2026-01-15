@@ -152,7 +152,7 @@ export default function TaxSellerReport() {
             {/* Filters */}
             <Paper sx={{ p: 3, mb: 3 }}>
                 <Grid container spacing={3}>
-                    <Grid item size={{ xs: 12, md: selectedSeller ? 4 : 6 }}>
+                    <Grid size={{ xs: 12, md: selectedSeller ? 4 : 6 }}>
                         <TextField
                             select
                             fullWidth
@@ -166,7 +166,7 @@ export default function TaxSellerReport() {
                             ))}
                         </TextField>
                     </Grid>
-                    <Grid item>
+                    <Grid>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DatePicker
                                 label="Select Month"
@@ -194,7 +194,7 @@ export default function TaxSellerReport() {
                 <>
                     {/* Summary Cards */}
                     <Grid container spacing={3} sx={{ mb: 3 }}>
-                        <Grid item xs={12} md={4}>
+                        <Grid size={{ xs: 12, md: 4 }}>
                             <Card>
                                 <CardContent>
                                     <Typography color="text.secondary" gutterBottom>Tax Base (excl. VAT)</Typography>
@@ -202,7 +202,7 @@ export default function TaxSellerReport() {
                                 </CardContent>
                             </Card>
                         </Grid>
-                        <Grid item xs={12} md={4}>
+                        <Grid size={{ xs: 12, md: 4 }}>
                             <Card>
                                 <CardContent>
                                     <Typography color="text.secondary" gutterBottom>VAT Amount</Typography>
@@ -210,7 +210,7 @@ export default function TaxSellerReport() {
                                 </CardContent>
                             </Card>
                         </Grid>
-                        <Grid item xs={12} md={4}>
+                        <Grid size={{ xs: 12, md: 4 }}>
                             <Card sx={{ bgcolor: 'primary.main', color: 'white' }}>
                                 <CardContent>
                                     <Typography sx={{ color: 'rgba(255,255,255,0.8)' }} gutterBottom>Total (incl. VAT)</Typography>
