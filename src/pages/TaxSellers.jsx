@@ -4,6 +4,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import { useNavigate } from "react-router-dom";
 import { apiClient } from "../utils/apiClient";
+import { useAuth } from "../context/AuthContext";
 
 export default function TaxSellers() {
     const [sellers, setSellers] = useState([]);
@@ -13,6 +14,9 @@ export default function TaxSellers() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const navigate = useNavigate();
+    const { user } = useAuth();
+
+    const canViewReports = user?.role !== 'ttn';
 
     useEffect(() => {
         const fetchSellers = async () => {
@@ -74,7 +78,7 @@ export default function TaxSellers() {
                                 <TableCell>Tax ID</TableCell>
                                 <TableCell>Wallet Address</TableCell>
                                 <TableCell>Email</TableCell>
-                                <TableCell align="right">Actions</TableCell>
+                                {canViewReports && <TableCell align="right">Actions</TableCell>}
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -86,21 +90,23 @@ export default function TaxSellers() {
                                         {seller.address}
                                     </TableCell>
                                     <TableCell>{seller.email}</TableCell>
-                                    <TableCell align="right">
-                                        <Tooltip title="View Seller Report">
-                                            <IconButton
-                                                color="primary"
-                                                onClick={() => navigate(`/tax-seller-report?sellerId=${seller._id}`)}
-                                            >
-                                                <AssessmentIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </TableCell>
+                                    {canViewReports && (
+                                        <TableCell align="right">
+                                            <Tooltip title="View Seller Report">
+                                                <IconButton
+                                                    color="primary"
+                                                    onClick={() => navigate(`/tax-seller-report?sellerId=${seller._id}`)}
+                                                >
+                                                    <AssessmentIcon />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </TableCell>
+                                    )}
                                 </TableRow>
                             ))}
                             {paginatedSellers.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={4} align="center">No sellers match your search</TableCell>
+                                    <TableCell colSpan={canViewReports ? 5 : 4} align="center">No sellers match your search</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
