@@ -4,6 +4,7 @@ import {
     TableHead, TableRow, Alert, TextField, MenuItem, Button, Card, CardContent,
     Grid, CircularProgress
 } from "@mui/material";
+import { useSearchParams } from "react-router-dom";
 import PrintIcon from '@mui/icons-material/Print';
 import { apiClient } from "../utils/apiClient";
 import jsPDF from 'jspdf';
@@ -21,13 +22,21 @@ export default function TaxSellerReport() {
     const [invoices, setInvoices] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [searchParams] = useSearchParams();
 
     // Fetch sellers for dropdown
     useEffect(() => {
         apiClient.get('/api/sellers')
-            .then(setSellers)
+            .then(data => {
+                setSellers(data);
+                // Check for sellerId in query params
+                const sellerId = searchParams.get('sellerId');
+                if (sellerId) {
+                    setSelectedSeller(sellerId);
+                }
+            })
             .catch(() => setSellers([]));
-    }, []);
+    }, [searchParams]);
 
     // Fetch invoices when seller and month are selected
     useEffect(() => {
