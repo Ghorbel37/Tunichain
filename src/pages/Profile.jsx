@@ -49,7 +49,7 @@ export default function Profile() {
 
     if (loading) {
         return (
-            <Box sx={{ maxWidth: 800, mx: "auto", mt: 4, px: 2 }}>
+            <Box sx={{ maxWidth: 1000, mx: "auto", mt: 4, px: 2 }}>
                 <Paper sx={{ p: 4 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
                         <Skeleton variant="circular" width={100} height={100} />
@@ -66,122 +66,126 @@ export default function Profile() {
 
     if (error) {
         return (
-            <Box sx={{ maxWidth: 800, mx: "auto", mt: 4, px: 2 }}>
+            <Box sx={{ maxWidth: 1000, mx: "auto", mt: 4, px: 2 }}>
                 <Alert severity="error">{error}</Alert>
             </Box>
         );
     }
 
     return (
-        <Box sx={{ maxWidth: 800, mx: "auto", mt: 4, px: 2 }}>
-            <Typography variant="h5" gutterBottom fontWeight="bold">My Profile</Typography>
+        <Box sx={{ maxWidth: 1000, mx: "auto", mt: 4, px: 2 }}>
+            <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+                <Typography variant="h5" gutterBottom fontWeight="bold" sx={{ mb: 3 }}>My Profile</Typography>
 
-            {/* Profile Header Card */}
-            <Paper
-                sx={{
-                    p: 4,
-                    mb: 3,
-                    background: (theme) =>
-                        theme.palette.mode === 'dark'
-                            ? 'linear-gradient(135deg, #1a237e 0%, #283593 100%)'
-                            : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    color: 'white',
-                }}
-            >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
-                    <Avatar
-                        sx={{
-                            width: 100,
-                            height: 100,
-                            fontSize: '2rem',
-                            bgcolor: 'rgba(255,255,255,0.2)',
-                            border: '3px solid rgba(255,255,255,0.5)',
-                        }}
-                    >
-                        {profile?.address ? profile.address.slice(2, 4).toUpperCase() : '?'}
-                    </Avatar>
-                    <Box sx={{ flex: 1, minWidth: 200 }}>
-                        <Typography variant="h5" fontWeight="bold" sx={{ mb: 1 }}>
-                            Tunichain Account
-                        </Typography>
-                        <Chip
-                            label={roleInfo.label}
-                            color={roleInfo.color}
-                            size="medium"
-                            sx={{ fontWeight: 'bold' }}
-                        />
+                {/* Profile Header Card */}
+                <Paper
+                    elevation={0}
+                    sx={{
+                        p: 4,
+                        mb: 4,
+                        background: (theme) =>
+                            theme.palette.mode === 'dark'
+                                ? 'linear-gradient(135deg, #1a237e 0%, #283593 100%)'
+                                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        borderRadius: 2
+                    }}
+                >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
+                        <Avatar
+                            sx={{
+                                width: 100,
+                                height: 100,
+                                fontSize: '2rem',
+                                bgcolor: 'rgba(255,255,255,0.2)',
+                                border: '3px solid rgba(255,255,255,0.5)',
+                            }}
+                        >
+                            {profile?.address ? profile.address.slice(2, 4).toUpperCase() : '?'}
+                        </Avatar>
+                        <Box sx={{ flex: 1, minWidth: 200 }}>
+                            <Typography variant="h5" fontWeight="bold" sx={{ mb: 1 }}>
+                                Tunichain Account
+                            </Typography>
+                            <Chip
+                                label={roleInfo.label}
+                                color={roleInfo.color}
+                                size="medium"
+                                sx={{ fontWeight: 'bold' }}
+                            />
+                        </Box>
                     </Box>
-                </Box>
-            </Paper>
+                </Paper>
 
-            {/* Account Details */}
-            <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                    <Card>
-                        <CardContent>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                                <AccountBalanceWalletIcon color="primary" />
-                                <Typography variant="h6">Wallet Address</Typography>
-                            </Box>
-                            <Typography
-                                variant="body1"
-                                sx={{
-                                    fontFamily: 'monospace',
-                                    bgcolor: 'action.hover',
-                                    p: 1.5,
-                                    borderRadius: 1,
-                                    wordBreak: 'break-all'
-                                }}
-                            >
-                                {profile?.address || authUser?.address || 'N/A'}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                                Your Ethereum wallet address used for authentication
-                            </Typography>
-                        </CardContent>
-                    </Card>
+                {/* Account Details */}
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <Card sx={{ height: '100%', bgcolor: 'background.default' }} variant="outlined">
+                            <CardContent>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                                    <AccountBalanceWalletIcon color="primary" />
+                                    <Typography variant="h6">Wallet Address</Typography>
+                                </Box>
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        fontFamily: 'monospace',
+                                        bgcolor: 'action.hover',
+                                        p: 1.5,
+                                        borderRadius: 1,
+                                        wordBreak: 'break-all'
+                                    }}
+                                >
+                                    {profile?.address || authUser?.address || 'N/A'}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                                    Your Ethereum wallet address used for authentication
+                                </Typography>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <Card sx={{ height: '100%', bgcolor: 'background.default' }} variant="outlined">
+                            <CardContent>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                                    <BadgeIcon color="primary" />
+                                    <Typography variant="h6">Role</Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <Chip
+                                        label={roleInfo.label}
+                                        color={roleInfo.color}
+                                        size="large"
+                                        sx={{ fontWeight: 'bold' }}
+                                    />
+                                    <VerifiedUserIcon color="success" />
+                                </Box>
+                                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                                    {roleInfo.description}
+                                </Typography>
+                            </CardContent>
+                        </Card>
+                    </Grid>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
-                    <Card>
-                        <CardContent>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                                <BadgeIcon color="primary" />
-                                <Typography variant="h6">Role</Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Chip
-                                    label={roleInfo.label}
-                                    color={roleInfo.color}
-                                    size="large"
-                                    sx={{ fontWeight: 'bold' }}
-                                />
-                                <VerifiedUserIcon color="success" />
-                            </Box>
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                                {roleInfo.description}
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                </Grid>
-            </Grid>
-
-            {/* Additional Info */}
-            <Paper sx={{ mt: 3, p: 3 }}>
-                <Typography variant="h6" gutterBottom>Account Information</Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Typography color="text.secondary">Account Status</Typography>
-                        <Chip label="Active" color="success" size="small" />
-                    </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Typography color="text.secondary">Authentication</Typography>
-                        <Typography>Sign-In with Ethereum (SIWE)</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Typography color="text.secondary">Network</Typography>
-                        <Typography>Tunichain</Typography>
+                {/* Additional Info */}
+                <Box sx={{ mt: 3 }}>
+                    <Typography variant="h6" gutterBottom>Account Information</Typography>
+                    <Divider sx={{ mb: 2 }} />
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography color="text.secondary">Account Status</Typography>
+                            <Chip label="Active" color="success" size="small" />
+                        </Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography color="text.secondary">Authentication</Typography>
+                            <Typography>Sign-In with Ethereum (SIWE)</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography color="text.secondary">Network</Typography>
+                            <Typography>Tunichain</Typography>
+                        </Box>
                     </Box>
                 </Box>
             </Paper>
