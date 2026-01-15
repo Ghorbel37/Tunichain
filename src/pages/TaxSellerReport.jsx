@@ -52,7 +52,6 @@ export default function TaxSellerReport() {
                 const monthStr = selectedMonth.format('YYYY-MM');
                 const data = await apiClient.get(`/api/invoices/seller/${selectedSeller}?month=${monthStr}`);
                 setInvoices(data);
-                console.log(data);
             } catch (err) {
                 setError(err.message || "Error fetching invoices");
                 setInvoices([]);
