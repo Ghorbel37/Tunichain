@@ -197,4 +197,196 @@ describe("Tunichain", async function () {
             });
         });
     });
+
+    // ============================================
+    // EVENT VERIFICATION TESTS
+    // ============================================
+
+    describe("Event Verification Tests", async function () {
+        describe("Registry Events", async function () {
+            it("Should emit SellerAdded event with correct parameters", async function () {
+                const sellerAddr = "0x7777777777777777777777777777777777777777";
+                const metadata = "Test Seller Metadata";
+
+                const txHash = await registry.write.addSeller([sellerAddr, metadata]);
+                const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+                const logs = await publicClient.getContractEvents({
+                    address: registry.address,
+                    abi: registry.abi,
+                    eventName: "SellerAdded",
+                    fromBlock: receipt.blockNumber,
+                    toBlock: receipt.blockNumber,
+                    strict: true,
+                });
+
+                assert.equal(logs.length, 1, "Should emit exactly one SellerAdded event");
+                assert.equal(logs[0].args.seller, sellerAddr, "Event seller address should match");
+                assert.equal(logs[0].args.meta, metadata, "Event metadata should match");
+            });
+
+            it("Should emit BankAdded event with correct parameters", async function () {
+                const bankAddr = "0x8888888888888888888888888888888888888888";
+                const metadata = "Test Bank Metadata";
+
+                const txHash = await registry.write.addBank([bankAddr, metadata]);
+                const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+                const logs = await publicClient.getContractEvents({
+                    address: registry.address,
+                    abi: registry.abi,
+                    eventName: "BankAdded",
+                    fromBlock: receipt.blockNumber,
+                    toBlock: receipt.blockNumber,
+                    strict: true,
+                });
+
+                assert.equal(logs.length, 1, "Should emit exactly one BankAdded event");
+                assert.equal(logs[0].args.bank, bankAddr, "Event bank address should match");
+                assert.equal(logs[0].args.meta, metadata, "Event metadata should match");
+            });
+        });
+
+        describe("InvoiceValidation Events", async function () {
+            it("Should emit InvoiceStored event with correct parameters", async function () {
+                const invoiceHash = "0x" + "aa".repeat(32);
+                const amount = 2000000n;
+                const vatRate = 190n;
+                const expectedVat = (amount * vatRate) / 1000n;
+
+                const txHash = await invoiceValidation.write.submitInvoice(
+                    [invoiceHash, amount, vatRate],
+                    { account: sellerClient.account }
+                );
+                const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+                const logs = await publicClient.getContractEvents({
+                    address: invoiceValidation.address,
+                    abi: invoiceValidation.abi,
+                    eventName: "InvoiceStored",
+                    fromBlock: receipt.blockNumber,
+                    toBlock: receipt.blockNumber,
+                    strict: true,
+                });
+
+                assert.equal(logs.length, 1, "Should emit exactly one InvoiceStored event");
+                assert.ok(logs[0].args.id > 0n, "Event should have valid invoice ID");
+                assert.equal(logs[0].args.seller.toLowerCase(), sellerAddress.toLowerCase(), "Event seller should match");
+                assert.equal(logs[0].args.hash, invoiceHash, "Event hash should match");
+                assert.equal(logs[0].args.amount, amount, "Event amount should match");
+                assert.equal(logs[0].args.vatRatePermille, vatRate, "Event VAT rate should match");
+                assert.equal(logs[0].args.vatAmount, expectedVat, "Event VAT amount should be calculated correctly");
+            });
+        });
+
+        describe("PaymentRegistry Events", async function () {
+            it("Should emit PaymentStored event with correct parameters", async function () {
+                // First create an invoice
+                const invoiceHash = "0x" + "bb".repeat(32);
+                await invoiceValidation.write.submitInvoice(
+                    [invoiceHash, 1500000n, 190n],
+                    { account: sellerClient.account }
+                );
+
+                const paymentHash = "0x" + "cc".repeat(32);
+                const amountPaid = 1785000n;
+
+                const txHash = await paymentRegistry.write.storePayment(
+                    [paymentHash, invoiceHash, amountPaid],
+                    { account: bankClient.account }
+                );
+                const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+                const logs = await publicClient.getContractEvents({
+                    address: paymentRegistry.address,
+                    abi: paymentRegistry.abi,
+                    eventName: "PaymentStored",
+                    fromBlock: receipt.blockNumber,
+                    toBlock: receipt.blockNumber,
+                    strict: true,
+                });
+
+                assert.equal(logs.length, 1, "Should emit exactly one PaymentStored event");
+                assert.ok(logs[0].args.id > 0n, "Event should have valid payment ID");
+                assert.equal(logs[0].args.bank.toLowerCase(), bankAddress.toLowerCase(), "Event bank should match");
+                assert.ok(logs[0].args.invoiceId > 0n, "Event should reference valid invoice ID");
+                assert.equal(logs[0].args.paymentHash, paymentHash, "Event payment hash should match");
+                assert.equal(logs[0].args.amountPaid, amountPaid, "Event amount paid should match");
+            });
+        });
+
+        describe("VATControl Events", async function () {
+            it("Should emit VATRecorded event when invoice is submitted", async function () {
+                const invoiceHash = "0x" + "dd".repeat(32);
+                const amount = 3000000n;
+                const vatRate = 190n;
+                const expectedVat = (amount * vatRate) / 1000n;
+
+                const txHash = await invoiceValidation.write.submitInvoice(
+                    [invoiceHash, amount, vatRate],
+                    { account: sellerClient.account }
+                );
+                const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+                const logs = await publicClient.getContractEvents({
+                    address: vatControl.address,
+                    abi: vatControl.abi,
+                    eventName: "VATRecorded",
+                    fromBlock: receipt.blockNumber,
+                    toBlock: receipt.blockNumber,
+                    strict: true,
+                });
+
+                assert.equal(logs.length, 1, "Should emit exactly one VATRecorded event");
+                assert.equal(logs[0].args.seller.toLowerCase(), sellerAddress.toLowerCase(), "Event seller should match");
+                assert.ok(logs[0].args.invoiceId > 0n, "Event should have valid invoice ID");
+                assert.equal(logs[0].args.taxableAmount, amount, "Event taxable amount should match");
+                assert.equal(logs[0].args.vatRatePermille, vatRate, "Event VAT rate should match");
+                assert.equal(logs[0].args.vatAmount, expectedVat, "Event VAT amount should be calculated correctly");
+                assert.ok(logs[0].args.sellerTotalTaxBase >= amount, "Event should track cumulative tax base");
+                assert.ok(logs[0].args.timestamp > 0n, "Event should have valid timestamp");
+            });
+
+            it("Should emit VATPaymentRecorded event when payment is stored", async function () {
+                // First create an invoice
+                const invoiceHash = "0x" + "ee".repeat(32);
+                const amount = 2500000n;
+                const vatRate = 190n;
+                const expectedVat = (amount * vatRate) / 1000n;
+
+                await invoiceValidation.write.submitInvoice(
+                    [invoiceHash, amount, vatRate],
+                    { account: sellerClient.account }
+                );
+
+                const paymentHash = "0x" + "ff".repeat(32);
+                const amountPaid = amount + expectedVat;
+
+                const txHash = await paymentRegistry.write.storePayment(
+                    [paymentHash, invoiceHash, amountPaid],
+                    { account: bankClient.account }
+                );
+                const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+                const logs = await publicClient.getContractEvents({
+                    address: vatControl.address,
+                    abi: vatControl.abi,
+                    eventName: "VATPaymentRecorded",
+                    fromBlock: receipt.blockNumber,
+                    toBlock: receipt.blockNumber,
+                    strict: true,
+                });
+
+                assert.equal(logs.length, 1, "Should emit exactly one VATPaymentRecorded event");
+                assert.equal(logs[0].args.seller.toLowerCase(), sellerAddress.toLowerCase(), "Event seller should match");
+                assert.ok(logs[0].args.paymentId > 0n, "Event should have valid payment ID");
+                assert.ok(logs[0].args.invoiceId > 0n, "Event should have valid invoice ID");
+                assert.equal(logs[0].args.amountPaid, amountPaid, "Event amount paid should match");
+                assert.equal(logs[0].args.vatRatePermille, vatRate, "Event VAT rate should match");
+                assert.equal(logs[0].args.vatAmount, expectedVat, "Event VAT amount should be calculated correctly");
+                assert.ok(logs[0].args.sellerTotalVatPaid >= expectedVat, "Event should track cumulative VAT paid");
+                assert.ok(logs[0].args.timestamp > 0n, "Event should have valid timestamp");
+            });
+        });
+    });
 });
