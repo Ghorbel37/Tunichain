@@ -199,6 +199,209 @@ describe("Tunichain", async function () {
     });
 
     // ============================================
+    // ADVANCED SECURITY TESTS
+    // ============================================
+
+    describe("Advanced Security Tests", async function () {
+        describe("Role Revocation", async function () {
+            it("Should REJECT revoked seller from submitting invoices", async function () {
+                // Create and add a temporary seller
+                const tempSellerClient = walletClients[4];
+                const tempSellerAddress = tempSellerClient.account.address;
+                await registry.write.addSeller([tempSellerAddress, "Temp Seller"]);
+
+                // Verify seller can submit invoice
+                const hash1 = "0x" + "f1".repeat(32);
+                await invoiceValidation.write.submitInvoice(
+                    [hash1, 100000n, 190n],
+                    { account: tempSellerClient.account }
+                );
+
+                // Revoke the seller
+                await registry.write.removeSeller([tempSellerAddress]);
+
+                // Verify revoked seller cannot submit invoices
+                const hash2 = "0x" + "f2".repeat(32);
+                await assert.rejects(
+                    async () => {
+                        await invoiceValidation.write.submitInvoice(
+                            [hash2, 100000n, 190n],
+                            { account: tempSellerClient.account }
+                        );
+                    },
+                    /not registered seller/
+                );
+            });
+
+            it("Should REJECT revoked bank from storing payments", async function () {
+                // Create and add a temporary bank
+                const tempBankClient = walletClients[5];
+                const tempBankAddress = tempBankClient.account.address;
+                await registry.write.addBank([tempBankAddress, "Temp Bank"]);
+
+                // Create an invoice for the payment
+                const invHash = "0x" + "f3".repeat(32);
+                await invoiceValidation.write.submitInvoice(
+                    [invHash, 100000n, 190n],
+                    { account: sellerClient.account }
+                );
+
+                // Verify bank can store payment
+                const payHash1 = "0x" + "f4".repeat(32);
+                await paymentRegistry.write.storePayment(
+                    [payHash1, invHash, 119000n],
+                    { account: tempBankClient.account }
+                );
+
+                // Revoke the bank
+                await registry.write.removeBank([tempBankAddress]);
+
+                // Create another invoice
+                const invHash2 = "0x" + "f5".repeat(32);
+                await invoiceValidation.write.submitInvoice(
+                    [invHash2, 100000n, 190n],
+                    { account: sellerClient.account }
+                );
+
+                // Verify revoked bank cannot store payments
+                const payHash2 = "0x" + "f6".repeat(32);
+                await assert.rejects(
+                    async () => {
+                        await paymentRegistry.write.storePayment(
+                            [payHash2, invHash2, 119000n],
+                            { account: tempBankClient.account }
+                        );
+                    },
+                    /not registered bank/
+                );
+            });
+        });
+
+        describe("Duplicate Prevention", async function () {
+            it("Should REJECT duplicate invoice hash", async function () {
+                const hash = "0x" + "d1".repeat(32);
+                await invoiceValidation.write.submitInvoice(
+                    [hash, 100000n, 190n],
+                    { account: sellerClient.account }
+                );
+
+                await assert.rejects(
+                    async () => {
+                        await invoiceValidation.write.submitInvoice(
+                            [hash, 200000n, 190n],
+                            { account: sellerClient.account }
+                        );
+                    },
+                    /already stored/
+                );
+            });
+
+            it("Should REJECT duplicate payment hash", async function () {
+                // Create an invoice
+                const invHash = "0x" + "d2".repeat(32);
+                await invoiceValidation.write.submitInvoice(
+                    [invHash, 100000n, 190n],
+                    { account: sellerClient.account }
+                );
+
+                const payHash = "0x" + "d3".repeat(32);
+                await paymentRegistry.write.storePayment(
+                    [payHash, invHash, 119000n],
+                    { account: bankClient.account }
+                );
+
+                // Create another invoice for second payment attempt
+                const invHash2 = "0x" + "d4".repeat(32);
+                await invoiceValidation.write.submitInvoice(
+                    [invHash2, 100000n, 190n],
+                    { account: sellerClient.account }
+                );
+
+                await assert.rejects(
+                    async () => {
+                        await paymentRegistry.write.storePayment(
+                            [payHash, invHash2, 119000n],
+                            { account: bankClient.account }
+                        );
+                    },
+                    /payment exists/
+                );
+            });
+
+            it("Should REJECT payment for unknown invoice hash", async function () {
+                const unknownInvHash = "0x" + "d5".repeat(32);
+                const payHash = "0x" + "d6".repeat(32);
+
+                await assert.rejects(
+                    async () => {
+                        await paymentRegistry.write.storePayment(
+                            [payHash, unknownInvHash, 119000n],
+                            { account: bankClient.account }
+                        );
+                    },
+                    /invoice unknown/
+                );
+            });
+        });
+
+        describe("Admin-Only Functions", async function () {
+            it("Should REJECT non-admin from calling setVATControl on InvoiceValidation", async function () {
+                await assert.rejects(
+                    async () => {
+                        await invoiceValidation.write.setVATControl(
+                            [vatControl.address],
+                            { account: unauthorizedClient.account }
+                        );
+                    },
+                    /only admin/
+                );
+            });
+
+            it("Should REJECT non-admin from calling setVATControl on PaymentRegistry", async function () {
+                await assert.rejects(
+                    async () => {
+                        await paymentRegistry.write.setVATControl(
+                            [vatControl.address],
+                            { account: unauthorizedClient.account }
+                        );
+                    },
+                    /only admin/
+                );
+            });
+        });
+
+        describe("Edge Cases", async function () {
+            it("Should handle zero amount invoice", async function () {
+                const hash = "0x" + "e1".repeat(32);
+
+                // This should succeed (contract allows zero amount)
+                const txHash = await invoiceValidation.write.submitInvoice(
+                    [hash, 0n, 190n],
+                    { account: sellerClient.account }
+                );
+                const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+                assert.ok(receipt.status === "success", "Zero amount invoice should be accepted");
+
+                const invId = await invoiceValidation.read.getInvoiceIdByHash([hash]);
+                assert.ok(invId > 0n, "Invoice should be stored");
+            });
+
+            it("Should handle empty metadata for seller", async function () {
+                const addr = "0x9999999999999999999999999999999999999999";
+
+                const txHash = await registry.write.addSeller([addr, ""]);
+                const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+                assert.ok(receipt.status === "success", "Empty metadata should be accepted");
+
+                const isSeller = await registry.read.isSeller([addr]);
+                assert.ok(isSeller, "Seller with empty metadata should be active");
+            });
+        });
+    });
+
+    // ============================================
     // EVENT VERIFICATION TESTS
     // ============================================
 
@@ -316,7 +519,7 @@ describe("Tunichain", async function () {
         });
 
         describe("VATControl Events", async function () {
-            it("Should emit VATRecorded event when invoice is submitted", async function () {
+            it("Should emit VATRecorded event when invoice is submitted with correct parameters", async function () {
                 const invoiceHash = "0x" + "dd".repeat(32);
                 const amount = 3000000n;
                 const vatRate = 190n;
@@ -347,7 +550,7 @@ describe("Tunichain", async function () {
                 assert.ok(logs[0].args.timestamp > 0n, "Event should have valid timestamp");
             });
 
-            it("Should emit VATPaymentRecorded event when payment is stored", async function () {
+            it("Should emit VATPaymentRecorded event when payment is stored with correct parameters", async function () {
                 // First create an invoice
                 const invoiceHash = "0x" + "ee".repeat(32);
                 const amount = 2500000n;
