@@ -16,7 +16,6 @@ export default function BankPayments() {
         invoice: "",
         paymentReference: "",
         amountPaid: "",
-        paidAt: "",
         documentPath: "",
     });
     const [error, setError] = useState("");
@@ -109,7 +108,6 @@ export default function BankPayments() {
                 invoice: "",
                 paymentReference: "",
                 amountPaid: "",
-                paidAt: "",
                 documentPath: "",
             });
         } catch (err) {
@@ -164,17 +162,7 @@ export default function BankPayments() {
                             inputProps={{ min: 0.001, step: 0.001 }}
                             sx={{ width: 150 }}
                         />
-                        <TextField
-                            label="Paid At"
-                            name="paidAt"
-                            value={form.paidAt}
-                            onChange={handleFormChange}
-                            type="datetime-local"
-                            required
-                            sx={{ minWidth: 200 }}
-                            InputLabelProps={{ shrink: true }}
-                        />
-                        <TextField
+<TextField
                             label="Document Path"
                             name="documentPath"
                             value={form.documentPath}
