@@ -227,6 +227,7 @@ export default function SellerInvoices() {
                                 <TableCell>Total Amount</TableCell>
                                 <TableCell>VAT Amount</TableCell>
                                 <TableCell>Items</TableCell>
+                                <TableCell>Status</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -242,6 +243,22 @@ export default function SellerInvoices() {
                                                 {item.description} (x{item.quantity}) - {(item.price / 1000).toFixed(3)}
                                             </div>
                                         ))}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Box
+                                            component="span"
+                                            sx={{
+                                                px: 1.5,
+                                                py: 0.5,
+                                                borderRadius: 1,
+                                                fontSize: '0.75rem',
+                                                fontWeight: 'bold',
+                                                backgroundColor: inv.status === "paid" ? 'success.light' : 'warning.light',
+                                                color: inv.status === "paid" ? 'success.dark' : 'warning.dark',
+                                            }}
+                                        >
+                                            {inv.status === "paid" ? 'Paid' : 'Unpaid'}
+                                        </Box>
                                     </TableCell>
                                 </TableRow>
                             ))}
