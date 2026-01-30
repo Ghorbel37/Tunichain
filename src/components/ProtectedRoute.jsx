@@ -8,7 +8,7 @@ const ROLE_PERMISSIONS = {
     superAdmin: ['/', '/about', '/profile', '/banks', '/sellers', '/invoices', '/payments', '/my-invoices', '/my-payments', '/tax-sellers', '/tax-invoices', '/tax-payments', '/tax-seller-report'],
     bank: ['/', '/about', '/profile', '/my-payments'],
     seller: ['/', '/about', '/profile', '/my-invoices'],
-    taxAdministration: ['/', '/about', '/profile', '/tax-sellers', '/tax-invoices', '/tax-payments', '/tax-seller-report'],
+    taxAdministration: ['/', '/about', '/profile', '/banks', '/sellers', '/tax-invoices', '/tax-payments', '/tax-seller-report'],
     ttn: ['/', '/about', '/profile', '/tax-sellers', '/tax-invoices', '/tax-payments'],
 };
 

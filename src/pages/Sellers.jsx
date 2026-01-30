@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Divider, Box, TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Alert, TablePagination, InputAdornment } from "@mui/material";
+import { Divider, Box, TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Alert, TablePagination, InputAdornment, IconButton, Tooltip } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import { useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
 import RegistryABI from "../abi/Registry.json";
 import { apiClient } from "../utils/apiClient";
@@ -12,6 +14,7 @@ const BLOCKCHAIN_CHAIN_ID = parseInt(import.meta.env.VITE_BLOCKCHAIN_CHAIN_ID);
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function Sellers() {
+  const navigate = useNavigate();
   const [sellers, setSellers] = useState([]);
   const [form, setForm] = useState({ name: "", taxId: "", address: "", email: "" });
   const [loading, setLoading] = useState(false);
@@ -165,8 +168,9 @@ export default function Sellers() {
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>Tax ID</TableCell>
-              <TableCell>Address</TableCell>
+              <TableCell>Wallet Address</TableCell>
               <TableCell>Email</TableCell>
+              <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -174,13 +178,25 @@ export default function Sellers() {
               <TableRow key={seller._id || idx}>
                 <TableCell>{seller.name}</TableCell>
                 <TableCell>{seller.taxId}</TableCell>
-                <TableCell>{seller.address}</TableCell>
+                <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                  {seller.address}
+                </TableCell>
                 <TableCell>{seller.email}</TableCell>
+                <TableCell align="right">
+                  <Tooltip title="View Seller Report">
+                    <IconButton
+                      color="primary"
+                      onClick={() => navigate(`/tax-seller-report?sellerId=${seller._id}`)}
+                    >
+                      <AssessmentIcon />
+                    </IconButton>
+                  </Tooltip>
+                </TableCell>
               </TableRow>
             ))}
             {paginatedSellers.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} align="center">No sellers found</TableCell>
+                <TableCell colSpan={5} align="center">No sellers found</TableCell>
               </TableRow>
             )}
           </TableBody>
