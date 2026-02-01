@@ -181,22 +181,26 @@ export default function BankPayments() {
                         <TableHead>
                             <TableRow>
                                 <TableCell>Payment Reference</TableCell>
-                                <TableCell>Invoice</TableCell>
-                                <TableCell>RIB</TableCell>
+                                <TableCell>Invoice Number</TableCell>
+                                <TableCell>Seller</TableCell>
+                                <TableCell>Client</TableCell>
                                 <TableCell>Amount Paid</TableCell>
+                                <TableCell>Buyer RIB</TableCell>
                                 <TableCell>Paid At</TableCell>
-                                <TableCell>Document Path</TableCell>
+                                <TableCell>Document</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {paginatedPayments.map((pay, idx) => (
                                 <TableRow key={pay._id || idx}>
                                     <TableCell>{pay.paymentReference}</TableCell>
-                                    <TableCell>{pay.invoice?._id || pay.invoice}</TableCell>
-                                    <TableCell>{pay.rib || 'N/A'}</TableCell>
+                                    <TableCell>{pay.invoice?.invoiceNumber || 'N/A'}</TableCell>
+                                    <TableCell>{pay.invoice?.seller?.name || 'N/A'}</TableCell>
+                                    <TableCell>{pay.invoice?.clientName || 'N/A'}</TableCell>
                                     <TableCell>{pay.amountPaid ? (pay.amountPaid / 1000).toFixed(3) : '0.000'}</TableCell>
+                                    <TableCell>{pay.rib || 'N/A'}</TableCell>
                                     <TableCell>{new Date(pay.paidAt).toLocaleString()}</TableCell>
-                                    <TableCell>{pay.documentPath || 'N/A'}</TableCell>
+                                    <TableCell>{pay.documentPath ? '✓' : '✗'}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
