@@ -1,57 +1,146 @@
-# Sample Hardhat 3 Beta Project (`node:test` and `viem`)
+# Tunichain Smart Contracts
 
-This project showcases a Hardhat 3 Beta project using the native Node.js test runner (`node:test`) and the `viem` library for Ethereum interactions.
+This repository contains the solidity smart contracts for the Tunichain project, built using Hardhat. The contracts manage invoice validation, payment tracking, and VAT calculations for the Tunichain platform.
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+## Key Features
 
-## Project Overview
+- **Access Control**: Secure role-based access for sellers, banks, and administrators
+- **User Management**: Onboard and manage sellers and banks with approval workflows
+- **Invoice Management**: Store and validate invoices with VAT calculations
+- **Payment Tracking**: Record payments and associate them with invoices
+- **VAT Calculation**: Automatic VAT calculation based on per-invoice rates
+- **Event Emission**: Comprehensive event logging for off-chain processing
 
-This example project includes:
+## Smart Contract Details
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using [`node:test`](nodejs.org/api/test.html), the new Node.js native test runner, and [`viem`](https://viem.sh/).
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+### Registry
+The Registry contract serves as the central access control mechanism for the Tunichain platform. It:
+- Manages user roles and permissions (sellers, banks, admins)
+- Handles seller and bank registration and approval
+- Controls access to platform features based on user roles
+- Maintains whitelists for approved participants
 
-## Usage
+### InvoiceValidation
+- Stores invoice data with VAT information
+- Emits events for invoice creation
+- Integrates with VATControl for tax calculations
+
+### PaymentRegistry
+- Records payment receipts
+- Matches payments to invoices
+- Triggers VAT calculations on payment
+
+### VATControl
+- Manages VAT rates and calculations
+- Tracks tax base, VAT owed, and VAT paid
+- Provides view functions for tax reporting
+
+## Project Structure
+
+```
+hardhat/
+├── contracts/              # Smart contracts
+│   ├── Registry.sol        # User and role management
+│   ├── InvoiceValidation.sol # Invoice storage and validation
+│   ├── PaymentRegistry.sol  # Payment receipt management
+│   └── VATControl.sol      # VAT calculation and tracking
+├── test/                   # Test files
+│   └── Tunichain.ts        # Main test suite
+├── scripts/                # Deployment and utility scripts
+│   └── deploy-tunichain.js # Main deployment script
+└── ignition/               # Hardhat Ignition deployment modules
+```
+
+## Prerequisites
+
+- Node.js (20+)
+- npm
+- Hardhat
+
+## Setup
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+## Deployment and Development
+
+### Quick Start (Hardhat Network)
+For rapid development and testing, you can deploy directly to the Hardhat network:
+
+1. Start a local Hardhat node in a terminal:
+   ```bash
+   npx hardhat node
+   ```
+
+2. In another terminal, run the deployment script provided:
+   ```bash
+   npx hardhat run scripts/deploy-tunichain.js --network localhost
+   ```
+
+This will:
+- Deploy all contracts in the correct order
+- Wire up contract dependencies
+- Update environment variables
+- Copy ABIs to frontend/backend
+
+## Deployment Script (`deploy-tunichain.js`)
+
+This helper script automates the deployment and setup process:
+
+1. **Deploys contracts** in the correct order:
+   - Registry
+   - InvoiceValidation
+   - PaymentRegistry
+   - VATControl
+
+2. **Configures contract relationships**:
+   - Sets up VATControl in both InvoiceValidation and PaymentRegistry
+   - Establishes proper permissions and connections
+
+3. **Updates environment**:
+   - Updates `.env` files in the hardhat, backend, and frontend folders
+   - Handles both local and remote deployments
+
+4. **Copies ABIs**:
+   - Copies contract ABIs to `../tunichain-frontend/src/abi/`
+   - Copies contract ABIs to `../tunichain-backend/abi/`
+
+> **Note**: This script is designed for Hardhat development environment only and is provided as a convenience for local development and testing.
+
+## Testing
+
+The project includes a comprehensive test suite that verifies the functionality and performance of the smart contracts. The test suite is written in TypeScript using Hardhat's testing environment.
+
+### Test Suite Features
+
+- **Access Control and Security Testing**: 
+  - Validates role-based permissions for admins, sellers, and banks
+  - Ensures only authorized users can perform specific actions
+  - Tests registration and approval workflows
+  - Verifies role revocation and access denial
+  - Prevents duplicate transactions and unauthorized access
+
+- **Gas Usage Analysis**:
+  - Measures gas consumption for all major operations
+  - Tracks gas costs for:
+    - User registration (adding sellers and banks)
+    - Invoice submission and validation by sellers
+    - Payment processing by banks
+
+- **Integration Testing**:
+  - Ensures proper event emission
+  - Tests correct interaction between contracts
+  - Validates state changes and access control across contracts
+  - Verifies proper handling of edge cases and invalid operations
 
 ### Running Tests
 
-To run all the tests in the project, execute the following command:
-
-```shell
-npx hardhat test
+```bash
+# Run all tests
+npx hardhat test ./test/Tunichain.ts
 ```
 
-You can also selectively run the Solidity or `node:test` tests:
-
-```shell
-npx hardhat test solidity
-npx hardhat test nodejs
-```
-
-### Make a deployment to Sepolia
-
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
-
-To run the deployment to a local chain:
-
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
-```
-
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
-
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
-
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
-
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
-```
-
-After setting the variable, you can run the deployment with the Sepolia network:
-
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
-```
+The test suite serves as both a verification tool and documentation of the expected behavior of the smart contracts.
