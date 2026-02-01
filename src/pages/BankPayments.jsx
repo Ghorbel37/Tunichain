@@ -151,7 +151,7 @@ export default function BankPayments() {
                             sx={{ minWidth: 200 }}
                         />
                         <TextField
-                            label="Document Path"
+                            label="Document Path (Optional)"
                             name="documentPath"
                             value={form.documentPath}
                             onChange={handleFormChange}
