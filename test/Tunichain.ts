@@ -40,7 +40,7 @@ describe("Tunichain", async function () {
         ]);
 
         // 4) Deploy VATControl with invoiceValidation and paymentRegistry addresses
-        vatControl = await viem.deployContract("VATControl", [
+        vatControl = await viem.deployContract("contracts/VATControl.sol:VATControl", [
             invoiceValidation.address,
             paymentRegistry.address,
         ]);
