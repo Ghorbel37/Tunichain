@@ -140,25 +140,25 @@ async function main() {
     console.log(`\nContract addresses updated in hardhat/.env.`);
 
     // Update .env in backend folder
-    const backendEnvPath = path.resolve("../backend/.env");
+    const backendEnvPath = path.resolve("../tunichain-backend/.env");
     if (fs.existsSync(path.dirname(backendEnvPath))) {
         updateEnvFile(backendEnvPath, addressVars);
-        console.log(`Contract addresses updated in backend/.env.`);
+        console.log(`Contract addresses updated in tunichain-backend/.env.`);
     } else {
-        console.warn(`backend/.env not updated: backend folder not found.`);
+        console.warn(`tunichain-backend/.env not updated: tunichain-backend folder not found.`);
     }
 
-        // Update .env in backend folder
-    const frontendEnvPath = path.resolve("../mui-app/.env");
+    // Update .env in frontend folder
+    const frontendEnvPath = path.resolve("../tunichain-frontend/.env");
     if (fs.existsSync(path.dirname(frontendEnvPath))) {
         updateEnvFile(frontendEnvPath, addressVars, "VITE_");
-        console.log(`Contract addresses updated in mui-app/.env.`);
+        console.log(`Contract addresses updated in tunichain-frontend/.env.`);
     } else {
-        console.warn(`mui-app/.env not updated: backend folder not found.`);
+        console.warn(`tunichain-frontend/.env not updated: tunichain-frontend folder not found.`);
     }
 
-    // 7) Copy ABIs to ../mui-app/src/abi
-    const abiOutputDir = path.resolve("../mui-app/src/abi");
+    // 7) Copy ABIs to ../tunichain-frontend/src/abi
+    const abiOutputDir = path.resolve("../tunichain-frontend/src/abi");
     if (!fs.existsSync(abiOutputDir)) {
         fs.mkdirSync(abiOutputDir, { recursive: true });
     }
@@ -180,11 +180,11 @@ async function main() {
             console.warn(`ABI not found for ${name}: ${artifactPath}`);
         }
     });
-    console.log("All ABIs copied to ../mui-app/src/abi");
+    console.log("All ABIs copied to ../tunichain-frontend/src/abi");
 
 
-    // 8) Copy ABIs to ../backend/abi
-    const abiOutputDir2 = path.resolve("../backend/abi");
+    // 8) Copy ABIs to ../tunichain-backend/abi
+    const abiOutputDir2 = path.resolve("../tunichain-backend/abi");
     if (!fs.existsSync(abiOutputDir2)) {
         fs.mkdirSync(abiOutputDir2, { recursive: true });
     }
@@ -199,7 +199,7 @@ async function main() {
             console.warn(`ABI not found for ${name}: ${artifactPath}`);
         }
     });
-    console.log("All ABIs copied to ../backend/abi");
+    console.log("All ABIs copied to ../tunichain-backend/abi");
 }
 
 main().catch(console.error);
