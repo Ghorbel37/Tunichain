@@ -114,7 +114,7 @@ export default function InvoiceDetailsModal({
                         <Grid size={{ xs: 12, sm: 6 }}>
                             <Typography variant="subtitle2" color="text.secondary">Date Issued</Typography>
                             <Typography variant="body1" fontWeight="medium">
-                                {invoice.issuedAt ? new Date(invoice.issuedAt).toLocaleDateString() : 'N/A'}
+                                {invoice.issuedAt ? new Date(invoice.issuedAt).toLocaleString() : 'N/A'}
                             </Typography>
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6 }}>
