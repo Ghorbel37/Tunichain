@@ -58,7 +58,7 @@ export default function BankPayments() {
 
             // Backend API call - bank is determined by JWT
             const paymentData = await apiClient.post('/api/payments', form);
-            console.log("Payment added in backend:", paymentData);
+            // console.log("Payment added in backend:", paymentData);
 
             // Resolve hashes and amount from backend response
             let paymentHash = paymentData.paymentHash || paymentData?.blockchain?.paymentHash;

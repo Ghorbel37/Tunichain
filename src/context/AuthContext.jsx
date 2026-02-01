@@ -55,7 +55,7 @@ export function AuthProvider({ children }) {
             // Request accounts
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             const address = utils.getAddress(accounts[0]);
-            console.log(address)
+            // console.log(address)
 
             // Get full SIWE message from backend
             const { message } = await getSiweMessage(address);
