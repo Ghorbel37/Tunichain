@@ -123,17 +123,18 @@ export default function Sellers() {
           required
         />
         <TextField
-          label="Tax ID"
+          label="Tax number"
           name="taxId"
           value={form.taxId}
           onChange={handleChange}
           required
         />
         <TextField
-          label="Address"
+          label="Wallet address"
           name="address"
           value={form.address}
           onChange={handleChange}
+          placeholder="0x..."
         />
         <TextField
           label="Email"
