@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography, TextField, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert, MenuItem, Divider, TablePagination } from "@mui/material";
+import { Box, Typography, TextField, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert, MenuItem, Divider, TablePagination, IconButton } from "@mui/material";
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { ethers } from "ethers";
 import InvoiceValidationABI from "../abi/InvoiceValidation.json";
 import { apiClient } from "../utils/apiClient";
+import InvoiceDetailsModal from "../components/InvoiceDetailsModal";
 
 // Read contract address from .env
 const INVOICE_VALIDATION_ADDRESS = import.meta.env.VITE_INVOICE_VALIDATION_ADDRESS;
@@ -21,6 +23,8 @@ export default function SellerInvoices() {
     const [success, setSuccess] = useState("");
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [selectedInvoice, setSelectedInvoice] = useState(null);
+    const [modalOpen, setModalOpen] = useState(false);
 
     // Fetch invoices for logged-in seller
     const fetchInvoices = async () => {
@@ -224,11 +228,12 @@ export default function SellerInvoices() {
                             <TableRow>
                                 <TableCell>Invoice Number</TableCell>
                                 <TableCell>Client Name</TableCell>
-                                <TableCell>Total Amount</TableCell>
+                                <TableCell>Total (HT)</TableCell>
                                 <TableCell>VAT Amount</TableCell>
-                                <TableCell>Items</TableCell>
+                                <TableCell>Total (TTC)</TableCell>
                                 <TableCell>Payment Status</TableCell>
                                 <TableCell>TTN Status</TableCell>
+                                <TableCell>Actions</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -238,13 +243,7 @@ export default function SellerInvoices() {
                                     <TableCell>{inv.clientName}</TableCell>
                                     <TableCell>{inv.totalAmount ? (inv.totalAmount / 1000).toFixed(3) : '0.000'}</TableCell>
                                     <TableCell>{inv.vatAmount ? (inv.vatAmount / 1000).toFixed(3) : '0.000'}</TableCell>
-                                    <TableCell>
-                                        {inv.items && inv.items.map((item, i) => (
-                                            <div key={i}>
-                                                {item.description} (x{item.quantity}) - {(item.price / 1000).toFixed(3)}
-                                            </div>
-                                        ))}
-                                    </TableCell>
+                                    <TableCell>{inv.totalAmountWithVat ? (inv.totalAmountWithVat / 1000).toFixed(3) : '0.000'}</TableCell>
                                     <TableCell>
                                         <Box
                                             component="span"
@@ -281,6 +280,17 @@ export default function SellerInvoices() {
                                             {inv.ttnValidationStatus?.charAt(0).toUpperCase() + inv.ttnValidationStatus?.slice(1) || 'Pending'}
                                         </Box>
                                     </TableCell>
+                                    <TableCell>
+                                        <IconButton 
+                                            onClick={() => {
+                                                setSelectedInvoice(inv);
+                                                setModalOpen(true);
+                                            }}
+                                            color="primary"
+                                        >
+                                            <VisibilityIcon />
+                                        </IconButton>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -296,6 +306,12 @@ export default function SellerInvoices() {
                     />
                 </TableContainer>
             )}
+
+            <InvoiceDetailsModal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                invoice={selectedInvoice}
+            />
         </Box>
     );
 }
