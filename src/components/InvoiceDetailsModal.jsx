@@ -125,7 +125,7 @@ export default function InvoiceDetailsModal({
                         <Grid size={{ xs: 12, sm: 6 }}>
                             <Typography variant="subtitle2" color="text.secondary">VAT Rate</Typography>
                             <Typography variant="body1" fontWeight="medium">
-                                {invoice.vatRatePermille ? `${invoice.vatRatePermille / 10}%` : 'N/A'}
+                                {typeof invoice.vatRatePermille === 'number' ? `${invoice.vatRatePermille / 10}%` : 'N/A'}
                             </Typography>
                         </Grid>
                     </Grid>
@@ -179,9 +179,7 @@ export default function InvoiceDetailsModal({
                             </Grid>
                             <Grid size={{ xs: 6 }}>
                                 <Typography variant="body1" align="right" fontWeight="bold">
-                                    {invoice.totalAmount && invoice.vatAmount
-                                        ? ((invoice.totalAmount + invoice.vatAmount) / 1000).toFixed(3)
-                                        : '0.000'}
+                                    {invoice.totalAmountWithVat ? (invoice.totalAmountWithVat / 1000).toFixed(3) : '0.000'}
                                 </Typography>
                             </Grid>
                         </Grid>
