@@ -126,7 +126,7 @@ export default function Banks() {
           required
         />
         <TextField
-          label="Address"
+          label="Wallet address"
           name="address"
           value={form.address}
           onChange={handleChange}
@@ -158,7 +158,7 @@ export default function Banks() {
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>BIC Code</TableCell>
-              <TableCell>Address</TableCell>
+              <TableCell>Wallet address</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
