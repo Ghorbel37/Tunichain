@@ -25,22 +25,6 @@ app.use("/api/invoices", invoiceRoutes);
 app.use("/api/banks", bankRoutes);
 app.use("/api/payments", paymentRoutes);
 
-// ============================================
-// EXAMPLE: Protected endpoint with RBAC
-// ============================================
-// Only taxAdministration and superAdmin can access this endpoint
-app.get("/api/admin/stats",
-    authMiddleware,
-    requireRoles(USER_ROLES.TAX_ADMIN, USER_ROLES.SUPER_ADMIN),
-    (req, res) => {
-        res.json({
-            message: "Admin stats endpoint",
-            user: req.user,
-            accessedAt: new Date().toISOString()
-        });
-    }
-);
-
 // Swagger setup
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
