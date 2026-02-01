@@ -26,6 +26,11 @@ const invoiceSchema = new mongoose.Schema({
     },
     paidAt: { type: Date, default: null },
     invoiceHash: { type: String, index: true },
+    ttnValidationStatus: {
+        type: String,
+        enum: ["pending", "valid", "invalid"],
+        default: "pending"
+    },
     blockchain: {
         status: { type: String, enum: ["pending", "confirmed", "failed"], default: "pending" },
         transactionHash: { type: String, default: null, index: true },

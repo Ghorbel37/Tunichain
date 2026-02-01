@@ -132,4 +132,51 @@ router.get("/unpaid", authMiddleware, async (req, res) => {
     }
 });
 
+/**
+ * @route PATCH /invoices/:id/ttn-validation
+ * @description Update the TTN validation status of an invoice (TTN role only)
+ * @access Private (TTN role required)
+ */
+router.post(
+    "/:id/ttn-validation",
+    authMiddleware,
+    requireRoles(USER_ROLES.TTN),
+    async (req, res) => {
+        try {
+            const { status } = req.body;
+            const { id } = req.params;
+
+            // Validate status
+            if (!["valid", "invalid"].includes(status)) {
+                return res.status(400).json({ 
+                    message: "Invalid status. Must be 'valid' or 'invalid'" 
+                });
+            }
+
+            const invoice = await Invoice.findByIdAndUpdate(
+                id,
+                { 
+                    ttnValidationStatus: status,
+                    updatedAt: new Date()
+                },
+                { new: true, runValidators: true }
+            );
+
+            if (!invoice) {
+                return res.status(404).json({ message: "Invoice not found" });
+            }
+
+            res.json({
+                message: `Invoice TTN validation status updated to '${status}'`,
+                invoice
+            });
+        } catch (err) {
+            res.status(500).json({ 
+                message: "Error updating TTN validation status",
+                error: err.message 
+            });
+        }
+    }
+);
+
 export default router;
