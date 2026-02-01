@@ -73,11 +73,11 @@ invoiceSchema.pre('save', async function(next) {
                 const invoiceDataString = JSON.stringify(hashData);
                 
                 // Debug logging
-                console.log('Hash generation data:', invoiceDataString);
+                // console.log('Hash generation data:', invoiceDataString);
                 
                 this.invoiceHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(invoiceDataString));
                 
-                console.log('Generated hash:', this.invoiceHash);
+                // console.log('Generated hash:', this.invoiceHash);
             }
         } catch (error) {
             console.error("Error generating invoice hash:", error);

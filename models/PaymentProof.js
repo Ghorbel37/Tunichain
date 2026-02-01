@@ -54,11 +54,11 @@ paymentProofSchema.pre('save', async function(next) {
                 const paymentDataString = JSON.stringify(paymentData);
                 
                 // Debug logging
-                console.log('Payment hash generation data:', paymentDataString);
+                // console.log('Payment hash generation data:', paymentDataString);
                 
                 this.paymentHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(paymentDataString));
                 
-                console.log('Generated payment hash:', this.paymentHash);
+                // console.log('Generated payment hash:', this.paymentHash);
             }
         } catch (error) {
             console.error("Error generating payment hash:", error);
