@@ -33,8 +33,8 @@ const allNavItems = [
     { text: "View Invoices", icon: <ReceiptLongIcon />, path: "/tax-invoices" },
     { text: "View Payments", icon: <PaymentIcon />, path: "/tax-payments" },
     { text: "Seller Reports", icon: <ReceiptLongIcon />, path: "/tax-seller-report" },
-    { text: "About", icon: <InfoIcon />, path: "/about" },
     { text: "Profile", icon: <PersonIcon />, path: "/profile" },
+    { text: "About", icon: <InfoIcon />, path: "/about" },  
 ];
 
 export default function ResponsiveDrawer({ drawerWidth, mobileOpen, onMobileToggle, open, onToggle }) {
