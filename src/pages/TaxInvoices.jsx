@@ -113,8 +113,9 @@ export default function TaxInvoices() {
                                 <TableCell>Invoice Number</TableCell>
                                 <TableCell>Seller</TableCell>
                                 <TableCell>Client Name</TableCell>
-                                <TableCell>Total Amount</TableCell>
-                                <TableCell>VAT Amount</TableCell>
+                                <TableCell>Total (HT)</TableCell>
+                                <TableCell>VAT Rate</TableCell>
+                                <TableCell>Total (TTC)</TableCell>
                                 <TableCell>Payment Status</TableCell>
                                 <TableCell>TTN Status</TableCell>
                                 <TableCell align="center">Actions</TableCell>
@@ -129,7 +130,8 @@ export default function TaxInvoices() {
                                         <TableCell>{inv.seller?.name || 'N/A'}</TableCell>
                                         <TableCell>{inv.clientName}</TableCell>
                                         <TableCell>{inv.totalAmount ? (inv.totalAmount / 1000).toFixed(3) : '0.000'}</TableCell>
-                                        <TableCell>{inv.vatAmount ? (inv.vatAmount / 1000).toFixed(3) : '0.000'}</TableCell>
+                                        <TableCell>{typeof inv.vatRatePermille === 'number' ? `${inv.vatRatePermille / 10}%` : 'N/A'}</TableCell>
+                                        <TableCell>{inv.totalAmountWithVat ? (inv.totalAmountWithVat / 1000).toFixed(3) : '0.000'}</TableCell>
                                         <TableCell>
                                             <Box
                                                 component="span"
