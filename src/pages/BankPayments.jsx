@@ -15,7 +15,7 @@ export default function BankPayments() {
     const [form, setForm] = useState({
         invoice: "",
         paymentReference: "",
-        amountPaid: "",
+        rib: "",
         documentPath: "",
     });
     const [error, setError] = useState("");
@@ -56,18 +56,8 @@ export default function BankPayments() {
         try {
             if (!window.ethereum) throw new Error("MetaMask is not installed");
 
-            if (parseFloat(form.amountPaid) <= 0) {
-                throw new Error("Amount paid must be positive");
-            }
-
-            // Convert amount from decimal to integer (multiply by 1000)
-            const amountPaidInteger = Math.round(parseFloat(form.amountPaid) * 1000);
-
             // Backend API call - bank is determined by JWT
-            const paymentData = await apiClient.post('/api/payments', {
-                ...form,
-                amountPaid: amountPaidInteger
-            });
+            const paymentData = await apiClient.post('/api/payments', form);
             console.log("Payment added in backend:", paymentData);
 
             // Resolve hashes and amount from backend response
@@ -107,7 +97,7 @@ export default function BankPayments() {
             setForm({
                 invoice: "",
                 paymentReference: "",
-                amountPaid: "",
+                rib: "",
                 documentPath: "",
             });
         } catch (err) {
@@ -153,16 +143,14 @@ export default function BankPayments() {
                             sx={{ minWidth: 200 }}
                         />
                         <TextField
-                            label="Amount Paid"
-                            name="amountPaid"
-                            value={form.amountPaid}
+                            label="RIB"
+                            name="rib"
+                            value={form.rib}
                             onChange={handleFormChange}
-                            type="number"
                             required
-                            inputProps={{ min: 0.001, step: 0.001 }}
-                            sx={{ width: 150 }}
+                            sx={{ minWidth: 200 }}
                         />
-<TextField
+                        <TextField
                             label="Document Path"
                             name="documentPath"
                             value={form.documentPath}
@@ -194,6 +182,7 @@ export default function BankPayments() {
                             <TableRow>
                                 <TableCell>Payment Reference</TableCell>
                                 <TableCell>Invoice</TableCell>
+                                <TableCell>RIB</TableCell>
                                 <TableCell>Amount Paid</TableCell>
                                 <TableCell>Paid At</TableCell>
                                 <TableCell>Document Path</TableCell>
@@ -204,9 +193,10 @@ export default function BankPayments() {
                                 <TableRow key={pay._id || idx}>
                                     <TableCell>{pay.paymentReference}</TableCell>
                                     <TableCell>{pay.invoice?._id || pay.invoice}</TableCell>
+                                    <TableCell>{pay.rib || 'N/A'}</TableCell>
                                     <TableCell>{pay.amountPaid ? (pay.amountPaid / 1000).toFixed(3) : '0.000'}</TableCell>
-                                    <TableCell>{pay.paidAt}</TableCell>
-                                    <TableCell>{pay.documentPath}</TableCell>
+                                    <TableCell>{new Date(pay.paidAt).toLocaleString()}</TableCell>
+                                    <TableCell>{pay.documentPath || 'N/A'}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
