@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography,
     Chip, Grid, Divider, Table, TableBody, TableCell, TableContainer, TableHead,
@@ -7,6 +7,7 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { apiClient } from "../utils/apiClient";
+import { useAuth } from "../context/AuthContext";
 
 /**
  * Reusable Invoice Details Modal Component
@@ -25,6 +26,8 @@ export default function InvoiceDetailsModal({
     onValidationSuccess,
     showValidationButtons = false
 }) {
+    const { user } = useAuth();
+    const isTTNUser = user?.role === 'ttn';
     const [validating, setValidating] = useState(false);
     const [validationError, setValidationError] = useState("");
     const [validationSuccess, setValidationSuccess] = useState("");
@@ -190,7 +193,7 @@ export default function InvoiceDetailsModal({
                 </Box>
             </DialogContent>
             <DialogActions>
-                {showValidationButtons && invoice.ttnValidationStatus === 'pending' && (
+                {isTTNUser && invoice.ttnValidationStatus === 'pending' && (
                     <>
                         <Button
                             onClick={() => handleValidation('valid')}
