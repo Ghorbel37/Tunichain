@@ -227,7 +227,8 @@ export default function SellerInvoices() {
                                 <TableCell>Total Amount</TableCell>
                                 <TableCell>VAT Amount</TableCell>
                                 <TableCell>Items</TableCell>
-                                <TableCell>Status</TableCell>
+                                <TableCell>Payment Status</TableCell>
+                                <TableCell>TTN Status</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -258,6 +259,26 @@ export default function SellerInvoices() {
                                             }}
                                         >
                                             {inv.status === "paid" ? 'Paid' : 'Unpaid'}
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Box
+                                            component="span"
+                                            sx={{
+                                                px: 1.5,
+                                                py: 0.5,
+                                                borderRadius: 1,
+                                                fontSize: '0.75rem',
+                                                fontWeight: 'bold',
+                                                backgroundColor: 
+                                                    inv.ttnValidationStatus === 'valid' ? 'success.light' : 
+                                                    inv.ttnValidationStatus === 'invalid' ? 'error.light' : 'warning.light',
+                                                color: 
+                                                    inv.ttnValidationStatus === 'valid' ? 'success.dark' : 
+                                                    inv.ttnValidationStatus === 'invalid' ? 'error.dark' : 'warning.dark',
+                                            }}
+                                        >
+                                            {inv.ttnValidationStatus?.charAt(0).toUpperCase() + inv.ttnValidationStatus?.slice(1) || 'Pending'}
                                         </Box>
                                     </TableCell>
                                 </TableRow>
