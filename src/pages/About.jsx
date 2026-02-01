@@ -12,8 +12,8 @@ export default function About() {
                 <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
                     About Tunichain
                 </Typography>
-                <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 800, mx: 'auto' }}>
-                    Building trust in the digital economy through blockchain-powered transparency and accountability.
+                <Typography variant="h5" sx={{ mb: 4, opacity: 0.9, fontWeight: 500 }}>
+                    Building trust in the digital economy with blockchain transparency
                 </Typography>
             </Box>
 

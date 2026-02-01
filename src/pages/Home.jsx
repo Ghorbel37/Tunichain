@@ -27,7 +27,7 @@ export default function Home() {
                         Welcome to Tunichain
                     </Typography>
                     <Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>
-                        Revolutionizing Online Commerce with Blockchain Transparency
+                        Building trust in the digital economy with blockchain transparency
                     </Typography>
                     <Typography variant="body1" sx={{ mb: 4, maxWidth: 600, mx: 'auto', opacity: 0.8 }}>
                         A secure, decentralized platform connecting Sellers, Banks, and Government Institutions to ensure trust and efficiency in every transaction.
