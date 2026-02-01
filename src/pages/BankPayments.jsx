@@ -125,12 +125,29 @@ export default function BankPayments() {
                             onChange={handleFormInvoiceChange}
                             required
                             sx={{ minWidth: 250 }}
+                            SelectProps={{
+                                renderValue: (selected) => {
+                                    const selectedInvoice = invoices.find(inv => inv._id === selected);
+                                    if (!selectedInvoice) return '';
+                                    return `${selectedInvoice.seller?.name || 'N/A'} → ${selectedInvoice.clientName || 'N/A'} : ${selectedInvoice.totalAmountWithVat ? (selectedInvoice.totalAmountWithVat / 1000).toFixed(3) : '0.000'}`;
+                                }
+                            }}
                         >
                             {invoices.length === 0 ? (
                                 <MenuItem disabled>No unpaid invoices available</MenuItem>
                             ) : (
                                 invoices.map(inv => (
-                                    <MenuItem key={inv._id} value={inv._id}>{inv.invoiceNumber}</MenuItem>
+                                    <MenuItem key={inv._id} value={inv._id}>
+                                        <Box>
+                                            <Box fontWeight="bold">{inv.invoiceNumber}</Box>
+                                            <Box fontSize="0.8rem" color="text.secondary">
+                                                {inv.seller?.name || 'No seller'} → {inv.clientName || 'No client'}
+                                            </Box>
+                                            <Box fontSize="0.8rem">
+                                                Total: {inv.totalAmountWithVat ? (inv.totalAmountWithVat / 1000).toFixed(3) : '0.000'}
+                                            </Box>
+                                        </Box>
+                                    </MenuItem>
                                 ))
                             )}
                         </TextField>
