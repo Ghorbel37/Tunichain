@@ -27,7 +27,10 @@ router.get("/", authMiddleware, requireRoles(USER_ROLES.BANK, USER_ROLES.TAX_ADM
 
         const payments = await PaymentProof.find(query)
             .populate("bank")
-            .populate("invoice");
+            .populate({
+                path: 'invoice',
+                populate: { path: 'seller', select: 'name'}
+            });
         res.json(payments);
     } catch (err) {
         res.status(500).json({ message: err.message });
