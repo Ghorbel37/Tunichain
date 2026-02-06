@@ -1,6 +1,6 @@
-# TuniChain Backend
+# Tunichain Backend
 
-TuniChain is a blockchain-based invoice management and validation system that provides a secure and transparent way to handle invoices, payments, and seller verification.
+This repository contains the backend services for the Tunichain project, built using Node.js and Express. The backend provides API endpoints, database management, and blockchain event listeners for the Tunichain platform.
 
 ## Features
 
@@ -21,7 +21,7 @@ TuniChain is a blockchain-based invoice management and validation system that pr
 - **Off-Chain Data Validation**: Cross-verification of off-chain data with on-chain state
 
 ## Content
-- [TuniChain Backend](#tunichain-backend)
+- [Tunichain Backend](#tunichain-backend)
   - [Features](#features)
   - [Content](#content)
   - [Project Structure](#project-structure)
