@@ -1,6 +1,6 @@
 # Tunichain Frontend
 
-Tunichain is a blockchain-powered platform designed to bring transparency and trust to digital commerce by connecting sellers, banks, and government institutions through a secure, decentralized ledger.
+This repository contains the frontend implementation for the Tunichain project, built using React.js and Material-UI (MUI). The application provides interfaces for multiple user roles including Tax Administration, TTN, Sellers, and Banks, with blockchain integration for secure and transparent digital commerce operations.
 
 ## Features
 
