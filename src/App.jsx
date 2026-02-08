@@ -137,7 +137,7 @@ export default function App({ mode = 'light', setMode }) {
               target="_blank"
               rel="noopener noreferrer"
               sx={{
-                color: 'text.secondary',
+                color: 'primary.main',
                 textDecoration: 'none',
                 fontWeight: 'medium',
                 '&:hover': {
