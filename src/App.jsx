@@ -115,8 +115,39 @@ export default function App({ mode = 'light', setMode }) {
         onToggle={handleDrawerOpen}
       />
       <Main open={drawerOpen}>
-        <Box sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Box sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", flexGrow: 1 }}>
           <Outlet />
+        </Box>
+        <Box
+          component="footer"
+          sx={{
+            py: 2,
+            px: 3,
+            mt: 'auto',
+            textAlign: 'center',
+            bgcolor: 'background.paper',
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            © 2025 Tunichain
+            {' • '}
+            <Box
+              component="a"
+              href="https://github.com/Ghorbel37/Tunichain"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                color: 'text.secondary',
+                textDecoration: 'none',
+                fontWeight: 'medium',
+                '&:hover': {
+                  textDecoration: 'underline',
+                },
+              }}
+            >
+              View on GitHub
+            </Box>
+          </Typography>
         </Box>
       </Main>
     </Box>
