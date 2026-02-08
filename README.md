@@ -69,7 +69,7 @@ A comprehensive platform that brings transparency and efficiency to tax administ
 flowchart LR
     U[User] <--> F[Frontend]
     F <--> B[Backend]
-    F <--> BC["Blockchain (On-chain)"]
+    F <--> BC[("Blockchain (On-chain)")]
     B[Backend] <--> DB[("Database (Off-chain)")]
     BC --> B
 ```
