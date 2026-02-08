@@ -99,7 +99,7 @@ export default function App({ mode = 'light', setMode }) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Tunichain App
+            Tunichain
           </Typography>
           <IconButton sx={{ ml: 1 }} color="inherit" onClick={handleThemeToggle}>
             {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
