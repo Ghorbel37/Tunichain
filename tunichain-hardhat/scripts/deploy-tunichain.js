@@ -1,0 +1,206 @@
+import hre from "hardhat";
+
+import Registry from "../ignition/modules/Registry.js";
+import InvoiceValidation from "../ignition/modules/InvoiceValidation.js";
+import PaymentRegistry from "../ignition/modules/PaymentRegistry.js";
+import VATControl from "../ignition/modules/VATControl.js";
+
+import fs from "fs";
+import path from "path";
+
+
+async function main() {
+    // Delete previous deployment directory
+    const deploymentPath = path.resolve("./ignition/deployments/chain-31337/journal.jsonl");
+    if (fs.existsSync(deploymentPath)) {
+        fs.rmSync(deploymentPath, { recursive: true, force: true });
+        console.log("Deleted previous deployment: chain-31337");
+    }
+
+    // Get the network connection from Hardhat Runtime Environment
+    const connection = await hre.network.connect();
+
+    // Get wallet client for signing transactions - we'll use its address as admin
+    const walletClients = await connection.viem.getWalletClients();
+    const adminAddress = walletClients[0].account.address;
+    console.log(`Using address as admin: ${adminAddress}\n`);
+
+    // 1) Deploy Registry (constructor requires admin address)
+    console.log("Deploying smart contracts...")
+    const { registry } = await connection.ignition.deploy(Registry, {
+        parameters: { Registry: { adminAddress } },
+    });
+    console.log(`Registry deployed to: ${registry.address}`);
+
+    // 2) Deploy InvoiceValidation (constructor requires registry address)
+    const registryAddress = registry.address;
+    const { invoiceValidation } = await connection.ignition.deploy(InvoiceValidation, {
+        parameters: { InvoiceValidation: { registryAddress } },
+    });
+    console.log(`InvoiceValidation deployed to: ${invoiceValidation.address}`);
+
+    // 3) Deploy PaymentRegistry (constructor requires registry and invoiceValidation addresses)
+    const invoiceValidationAddress = invoiceValidation.address;
+    const { paymentRegistry } = await connection.ignition.deploy(PaymentRegistry, {
+        parameters: { PaymentRegistry: { registryAddress, invoiceValidationAddress } },
+    });
+    console.log(`PaymentRegistry deployed to: ${paymentRegistry.address}`);
+
+    // 4) Deploy VATControl (constructor requires invoiceValidation and paymentRegistry addresses)
+    const paymentRegistryAddress = paymentRegistry.address;
+    const { vatControl } = await connection.ignition.deploy(VATControl, {
+        parameters: { VATControl: { invoiceValidationAddress, paymentRegistryAddress } },
+    });
+    console.log(`VATControl deployed to: ${vatControl.address}`);
+
+    // 5) Wire up VATControl to enable automatic VAT recording
+    console.log("\nConnecting VATControl to contracts...");
+    // Read invoiceVal abi file
+    const invoiceValidationArtifact = JSON.parse(
+        fs.readFileSync(path.resolve("./artifacts/contracts/InvoiceValidation.sol/InvoiceValidation.json"), "utf-8")
+    );
+    // Read paymentRegistry abi file
+    const paymentRegistryArtifact = JSON.parse(
+        fs.readFileSync(path.resolve("./artifacts/contracts/PaymentRegistry.sol/PaymentRegistry.json"), "utf-8")
+    );
+
+    const publicClient = await connection.viem.getPublicClient();
+    const walletClient = walletClients[0];
+
+    // Set VATControl on InvoiceValidation
+    const tx1 = await walletClient.writeContract({
+        address: invoiceValidation.address,
+        abi: invoiceValidationArtifact.abi,
+        functionName: "setVATControl",
+        args: [vatControl.address],
+    });
+    await publicClient.waitForTransactionReceipt({ hash: tx1 });
+    console.log("InvoiceValidation.setVATControl() complete");
+
+    // Set VATControl on PaymentRegistry
+    const tx2 = await walletClient.writeContract({
+        address: paymentRegistry.address,
+        abi: paymentRegistryArtifact.abi,
+        functionName: "setVATControl",
+        args: [vatControl.address],
+    });
+    await publicClient.waitForTransactionReceipt({ hash: tx2 });
+    console.log("PaymentRegistry.setVATControl() complete");
+    console.log("VATControl wired up successfully!");
+
+    // 6) Add addresses to .env files
+    // Helper to update .env file with contract addresses, preserving comments/formatting
+    function updateEnvFile(envPath, addressVars, prefix = "") {
+        let lines = [];
+        let foundVars = {};
+        if (fs.existsSync(envPath)) {
+            lines = fs.readFileSync(envPath, "utf-8").split("\n");
+            lines = lines.map(line => {
+                const match = line.match(/^\s*([A-Z0-9_]+)\s*=/);
+                if (match) {
+                    const varName = match[1];
+                    // Only match and replace variables with the prefix (if prefix is set)
+                    if (prefix && varName.startsWith(prefix)) {
+                        const key = varName.substring(prefix.length);
+                        if (addressVars.hasOwnProperty(key)) {
+                            foundVars[key] = true;
+                            return `${varName}=${addressVars[key]}`;
+                        }
+                    } else if (!prefix && addressVars.hasOwnProperty(varName)) {
+                        foundVars[varName] = true;
+                        return `${varName}=${addressVars[varName]}`;
+                    }
+                }
+                return line;
+            });
+        }
+        // Add any missing address variables at the end
+        Object.entries(addressVars).forEach(([key, value]) => {
+            const prefixedKey = prefix + key;
+            if (!foundVars[key]) {
+                lines.push(`${prefixedKey}=${value}`);
+            }
+        });
+        // Remove trailing blank lines, then add one
+        while (lines.length > 0 && lines[lines.length - 1].trim() === "") lines.pop();
+        lines.push("");
+        fs.writeFileSync(envPath, lines.join("\n"), { encoding: "utf-8" });
+    }
+
+    const addressVars = {
+        REGISTRY_ADDRESS: registry.address,
+        INVOICE_VALIDATION_ADDRESS: invoiceValidation.address,
+        PAYMENT_REGISTRY_ADDRESS: paymentRegistry.address,
+        VAT_CONTROL_ADDRESS: vatControl.address
+    };
+
+    // Update .env in hardhat folder
+    const hardhatEnvPath = path.resolve("./.env");
+    updateEnvFile(hardhatEnvPath, addressVars);
+    console.log(`\nContract addresses updated in hardhat/.env.`);
+
+    // Update .env in backend folder
+    const backendEnvPath = path.resolve("../tunichain-backend/.env");
+    if (fs.existsSync(path.dirname(backendEnvPath))) {
+        updateEnvFile(backendEnvPath, addressVars);
+        console.log(`Contract addresses updated in tunichain-backend/.env.`);
+    } else {
+        console.warn(`tunichain-backend/.env not updated: tunichain-backend folder not found.`);
+    }
+
+    // Update .env in frontend folder
+    const frontendEnvPath = path.resolve("../tunichain-frontend/.env");
+    if (fs.existsSync(path.dirname(frontendEnvPath))) {
+        updateEnvFile(frontendEnvPath, addressVars, "VITE_");
+        console.log(`Contract addresses updated in tunichain-frontend/.env.`);
+    } else {
+        console.warn(`tunichain-frontend/.env not updated: tunichain-frontend folder not found.`);
+    }
+
+    // 7) Copy ABIs to ../tunichain-frontend/src/abi
+    const abiOutputDir = path.resolve("../tunichain-frontend/src/abi");
+    if (!fs.existsSync(abiOutputDir)) {
+        fs.mkdirSync(abiOutputDir, { recursive: true });
+    }
+
+    const contractsToCopy = [
+        { name: "Registry", sol: "Registry.sol" },
+        { name: "InvoiceValidation", sol: "InvoiceValidation.sol" },
+        { name: "PaymentRegistry", sol: "PaymentRegistry.sol" },
+        { name: "VATControl", sol: "VATControl.sol" },
+    ];
+
+    contractsToCopy.forEach(({ name, sol }) => {
+        const artifactPath = path.resolve(`./artifacts/contracts/${sol}/${name}.json`);
+        const destPath = path.join(abiOutputDir, `${name}.json`);
+        if (fs.existsSync(artifactPath)) {
+            fs.copyFileSync(artifactPath, destPath);
+            // console.log(`ABI copied: ${destPath}`);
+        } else {
+            console.warn(`ABI not found for ${name}: ${artifactPath}`);
+        }
+    });
+    console.log("All ABIs copied to ../tunichain-frontend/src/abi");
+
+
+    // 8) Copy ABIs to ../tunichain-backend/abi
+    const abiOutputDir2 = path.resolve("../tunichain-backend/abi");
+    if (!fs.existsSync(abiOutputDir2)) {
+        fs.mkdirSync(abiOutputDir2, { recursive: true });
+    }
+
+    contractsToCopy.forEach(({ name, sol }) => {
+        const artifactPath = path.resolve(`./artifacts/contracts/${sol}/${name}.json`);
+        const destPath = path.join(abiOutputDir2, `${name}.json`);
+        if (fs.existsSync(artifactPath)) {
+            fs.copyFileSync(artifactPath, destPath);
+            // console.log(`ABI copied: ${destPath}`);
+        } else {
+            console.warn(`ABI not found for ${name}: ${artifactPath}`);
+        }
+    });
+    console.log("All ABIs copied to ../tunichain-backend/abi");
+}
+
+main().catch(console.error);
+// npx hardhat run scripts/deploy-tunichain.js --network localhost
