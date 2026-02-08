@@ -44,5 +44,5 @@ if (PAYMENT_REGISTRY_ADDRESS && RPC_URL) {
   console.warn("PAYMENT_REGISTRY_ADDRESS or RPC_URL not found in .env file. Payment listener not started.");
 }
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.SERVER_PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}\nAPI docs at http://localhost:${PORT}/api-docs`));
