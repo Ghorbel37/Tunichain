@@ -8,11 +8,11 @@ const TOKEN_KEY = 'tunichain_jwt';
 
 // Role-based default routes
 const ROLE_ROUTES = {
-    bank: '/my-payments',
-    seller: '/my-invoices',
-    taxAdministration: '/tax-invoices',
+    bank: '/',
+    seller: '/',
+    taxAdministration: '/',
     superAdmin: '/',
-    ttn: '/tax-invoices',
+    ttn: '/',
 };
 
 export function AuthProvider({ children }) {
