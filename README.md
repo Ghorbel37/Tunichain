@@ -34,6 +34,7 @@ A comprehensive platform that brings transparency and efficiency to tax administ
   - [Frontend](#frontend)
   - [Backend](#backend)
   - [Blockchain](#blockchain)
+- [Architecture](#architecture)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -46,7 +47,6 @@ A comprehensive platform that brings transparency and efficiency to tax administ
 - [Author](#author)
 
 ## Tech Stack
-
 ### Frontend
 - **Framework**: React.js with Vite
 - **UI Library**: Material-UI (MUI)
@@ -63,6 +63,16 @@ A comprehensive platform that brings transparency and efficiency to tax administ
 - **Development Environment**: Hardhat
 - **Smart Contracts**: Solidity (EVM compatible)
 - **Benchmarking**: Hyperledger Caliper
+
+## Architecture
+```mermaid
+flowchart LR
+    U[User] <--> F[Frontend]
+    F <--> B[Backend]
+    F --> BC[Blockchain]
+    B[Backend] <--> DB[Database]
+    BC --> B
+```
 
 ## Project Structure
 
