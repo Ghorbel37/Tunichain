@@ -30,21 +30,24 @@ A comprehensive platform that brings transparency and efficiency to tax administ
   - **Scalability**: Handles high transaction volumes efficiently
 
 ## Content
-- [Tech Stack](#tech-stack)
-  - [Frontend](#frontend)
-  - [Backend](#backend)
-  - [Blockchain](#blockchain)
-- [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Quick Start](#quick-start)
-- [Hybrid data storage](#hybrid-data-storage)
-  - [On-Chain Data](#on-chain-data)
-  - [Off-Chain Data](#off-chain-data)
-- [Data Linking](#data-linking)
-- [Documentation](#documentation)
-- [Author](#author)
+- [Tunichain - Blockchain-Powered Tax and Trade Network](#tunichain---blockchain-powered-tax-and-trade-network)
+  - [Key Features](#key-features)
+  - [Content](#content)
+  - [Tech Stack](#tech-stack)
+    - [Frontend](#frontend)
+    - [Backend](#backend)
+    - [Blockchain](#blockchain)
+  - [Architecture](#architecture)
+  - [Project Structure](#project-structure)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Quick Start](#quick-start)
+  - [Hybrid data storage](#hybrid-data-storage)
+    - [On-Chain Data](#on-chain-data)
+    - [Off-Chain Data](#off-chain-data)
+  - [Data Linking](#data-linking)
+  - [Documentation](#documentation)
+  - [Author](#author)
 
 ## Tech Stack
 ### Frontend
@@ -69,7 +72,7 @@ A comprehensive platform that brings transparency and efficiency to tax administ
 flowchart LR
     U[User] <--> F[Frontend]
     F <--> B[Backend]
-    F --> BC[Blockchain]
+    F <--> BC[Blockchain]
     B[Backend] <--> DB[Database]
     BC --> B
 ```
