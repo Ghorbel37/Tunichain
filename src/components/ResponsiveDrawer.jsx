@@ -34,7 +34,7 @@ const allNavItems = [
     { text: "View Payments", icon: <PaymentIcon />, path: "/tax-payments" },
     { text: "Seller Reports", icon: <ReceiptLongIcon />, path: "/tax-seller-report" },
     { text: "Profile", icon: <PersonIcon />, path: "/profile" },
-    { text: "About", icon: <InfoIcon />, path: "/about" },  
+    { text: "About", icon: <InfoIcon />, path: "/about" },
 ];
 
 export default function ResponsiveDrawer({ drawerWidth, mobileOpen, onMobileToggle, open, onToggle }) {
@@ -61,10 +61,10 @@ export default function ResponsiveDrawer({ drawerWidth, mobileOpen, onMobileTogg
     // Get role display name
     const getRoleLabel = (role) => {
         const roleMap = {
-            superAdmin: 'Admin',
+            superAdmin: 'Super Admin',
             bank: 'Bank',
             seller: 'Seller',
-            taxAdministration: 'Tax Admin',
+            taxAdministration: 'Tax Administration',
             ttn: 'TTN',
         };
         return roleMap[role] || role;

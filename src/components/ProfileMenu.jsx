@@ -22,7 +22,7 @@ function getRoleDisplay(role) {
     const roleNames = {
         bank: 'Bank',
         seller: 'Seller',
-        taxAdministration: 'Tax Admin',
+        taxAdministration: 'Tax Administration',
         superAdmin: 'Super Admin',
         ttn: 'TTN',
     };
