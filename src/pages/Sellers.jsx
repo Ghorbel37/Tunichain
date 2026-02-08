@@ -49,18 +49,17 @@ export default function Sellers() {
     setError("");
     setSuccess("");
     try {
-      //Verify metamask is installed
-      if (!window.ethereum) throw new Error("MetaMask is not installed");
+      // Verify MetaMask is installed
+      if (!window.ethereum) {
+        throw new Error("MetaMask is not installed. Please install MetaMask to continue.");
+      }
 
       // Validate form.address
       if (!ethers.utils.isAddress(form.address)) {
-        throw new Error("Invalid Ethereum address provided for address");
+        throw new Error("Invalid Ethereum address format. Please enter a valid wallet address.");
       }
       // Backend API call
       await apiClient.post('/api/sellers', form);
-      setForm({ name: "", taxId: "", address: "", email: "" });
-      setSuccess("Seller added successfully");
-      fetchSellers();
 
       // Blockchain transaction: call addSeller on Registry contract
       const provider = new ethers.providers.Web3Provider(window.ethereum, {
@@ -70,19 +69,20 @@ export default function Sellers() {
       await provider.send("eth_requestAccounts", []);
       const signer = provider.getSigner();
       const contract = new ethers.Contract(REGISTRY_ADDRESS, RegistryABI.abi, signer);
-      // The correct ABI for addSeller is (address seller, string meta)
-      // We'll use form.address as the seller address, and meta as a JSON string with name, taxId, and email
+
       const meta = JSON.stringify({ name: form.name, taxId: form.taxId, email: form.email });
 
       const tx = await contract.addSeller(form.address, meta);
       const receipt = await tx.wait();
-      if (receipt.status === 1) {
-        // Success
-        // console.log(receipt)
-        setSuccess(`Seller added successfully`);
-      } else {
-        throw new Error("Transaction failed on-chain.");
+
+      if (receipt.status !== 1) {
+        throw new Error("Transaction failed on blockchain. Please try again.");
       }
+
+      // Success - clear form and refresh
+      setForm({ name: "", taxId: "", address: "", email: "" });
+      setSuccess(`Seller "${form.name}" added successfully!`);
+      await fetchSellers();
 
     } catch (err) {
       // setError(err.message || "Error adding seller");
@@ -135,6 +135,7 @@ export default function Sellers() {
           value={form.address}
           onChange={handleChange}
           placeholder="0x..."
+          required
         />
         <TextField
           label="Email"

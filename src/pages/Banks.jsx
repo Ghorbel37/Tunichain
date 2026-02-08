@@ -46,18 +46,17 @@ export default function Banks() {
     setError("");
     setSuccess("");
     try {
-      //Verify metamask is installed
-      if (!window.ethereum) throw new Error("MetaMask is not installed");
+      // Verify MetaMask is installed
+      if (!window.ethereum) {
+        throw new Error("MetaMask is not installed. Please install MetaMask to continue.");
+      }
 
       // Validate form.address
       if (!ethers.utils.isAddress(form.address)) {
-        throw new Error("Invalid Ethereum address provided for address");
+        throw new Error("Invalid Ethereum address format. Please enter a valid wallet address.");
       }
       // Backend API call
       await apiClient.post('/api/banks', form);
-      setForm({ name: "", bicCode: "", address: "" });
-      setSuccess("Bank added successfully");
-      fetchBanks();
 
       // Blockchain transaction: call addBank on Registry contract
       const provider = new ethers.providers.Web3Provider(window.ethereum, {
@@ -67,19 +66,20 @@ export default function Banks() {
       await provider.send("eth_requestAccounts", []);
       const signer = provider.getSigner();
       const contract = new ethers.Contract(REGISTRY_ADDRESS, RegistryABI.abi, signer);
-      // The correct ABI for addBank is (address bank, string meta)
-      // We'll use form.address as the bank address, and meta as a JSON string with name and bicCode
+
       const meta = JSON.stringify({ name: form.name, bicCode: form.bicCode });
 
       const tx = await contract.addBank(form.address, meta);
       const receipt = await tx.wait();
-      if (receipt.status === 1) {
-        // Success
-        // console.log(receipt)
-        setSuccess(`Bank added successfully`);
-      } else {
-        throw new Error("Transaction failed on-chain.");
+
+      if (receipt.status !== 1) {
+        throw new Error("Transaction failed on blockchain. Please try again.");
       }
+
+      // Step 3: Success - clear form and refresh
+      setForm({ name: "", bicCode: "", address: "" });
+      setSuccess(`Bank "${form.name}" added successfully!`);
+      await fetchBanks();
 
     } catch (err) {
       // setError(err.message || "Error adding bank");
@@ -130,6 +130,8 @@ export default function Banks() {
           name="address"
           value={form.address}
           onChange={handleChange}
+          placeholder="0x..."
+          required
         />
         <Button type="submit" variant="contained" color="primary" sx={{ minWidth: 120 }}>
           Add Bank
