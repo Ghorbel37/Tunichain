@@ -259,20 +259,22 @@ export default function Payments() {
       <Divider sx={{ mt: 3, mb: 3 }} />
       <Typography variant="h6" sx={{ mb: 2 }}>Payments for Selected Bank</Typography>
       {/* Bank filter menu above the table */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <TextField
-          select
-          label="Filter by Bank"
-          value={selectedBank}
-          onChange={handleFilterBankChange}
-          sx={{ minWidth: 250, mr: 2 }}
-        >
-          <MenuItem key="all" value="all">All Banks</MenuItem>
-          {banks.map(bank => (
-            <MenuItem key={bank._id} value={bank._id}>{bank.name}</MenuItem>
-          ))}
-        </TextField>
-      </Box>
+      {banks.length > 0 && (
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <TextField
+            select
+            label="Filter by Bank"
+            value={selectedBank}
+            onChange={handleFilterBankChange}
+            sx={{ minWidth: 250, mr: 2 }}
+          >
+            <MenuItem key="all" value="all">All Banks</MenuItem>
+            {banks.map(bank => (
+              <MenuItem key={bank._id} value={bank._id}>{bank.name}</MenuItem>
+            ))}
+          </TextField>
+        </Box>
+      )}
       {selectedBank && paginatedPayments.length === 0 && (
         <Alert severity="info">No payments found for this bank.</Alert>
       )}

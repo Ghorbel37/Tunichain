@@ -263,20 +263,22 @@ export default function Invoices() {
       <Divider sx={{ mb: 2 }} />
       <Typography variant="h6" sx={{ mb: 2 }}>Invoices for Selected Seller</Typography>
       {/* Seller filter menu above the table */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <TextField
-          select
-          label="Filter by Seller"
-          value={selectedSeller}
-          onChange={handleFilterSellerChange}
-          sx={{ minWidth: 250, mr: 2 }}
-        >
-          <MenuItem key="all" value="all">All Sellers</MenuItem>
-          {sellers.map(seller => (
-            <MenuItem key={seller._id} value={seller._id}>{seller.name}</MenuItem>
-          ))}
-        </TextField>
-      </Box>
+      {sellers.length > 0 && (
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <TextField
+            select
+            label="Filter by Seller"
+            value={selectedSeller}
+            onChange={handleFilterSellerChange}
+            sx={{ minWidth: 250, mr: 2 }}
+          >
+            <MenuItem key="all" value="all">All Sellers</MenuItem>
+            {sellers.map(seller => (
+              <MenuItem key={seller._id} value={seller._id}>{seller.name}</MenuItem>
+            ))}
+          </TextField>
+        </Box>
+      )}
       {selectedSeller && paginatedInvoices.length === 0 && (
         <Alert severity="info">No invoices found for this seller.</Alert>
       )}

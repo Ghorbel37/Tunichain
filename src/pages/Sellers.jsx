@@ -148,19 +148,21 @@ export default function Sellers() {
         </Button>
       </Box>
       <Divider sx={{ mb: 2 }} />
-      <TextField
-        label="Search"
-        value={search}
-        onChange={e => { setSearch(e.target.value); setPage(0); }}
-        sx={{ mb: 2, width: 300 }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon />
-            </InputAdornment>
-          ),
-        }}
-      />
+      {sellers.length > 0 && (
+        <TextField
+          label="Search"
+          value={search}
+          onChange={e => { setSearch(e.target.value); setPage(0); }}
+          sx={{ mb: 2, width: 300 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+      )}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
       <TableContainer component={Paper}>

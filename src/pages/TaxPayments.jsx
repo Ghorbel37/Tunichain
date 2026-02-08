@@ -49,20 +49,22 @@ export default function TaxPayments() {
                 View all payment receipts in the system. Filter by seller to see specific payments.
             </Typography>
 
-            <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-                <TextField
-                    select
-                    label="Filter by Seller"
-                    value={selectedSeller}
-                    onChange={(e) => { setSelectedSeller(e.target.value); setPage(0); }}
-                    sx={{ minWidth: 300 }}
-                >
-                    <MenuItem key="all" value="all">All Sellers</MenuItem>
-                    {sellers.map(seller => (
-                        <MenuItem key={seller._id} value={seller._id}>{seller.name}</MenuItem>
-                    ))}
-                </TextField>
-            </Box>
+            {sellers.length > 0 && (
+                <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                    <TextField
+                        select
+                        label="Filter by Seller"
+                        value={selectedSeller}
+                        onChange={(e) => { setSelectedSeller(e.target.value); setPage(0); }}
+                        sx={{ minWidth: 300 }}
+                    >
+                        <MenuItem key="all" value="all">All Sellers</MenuItem>
+                        {sellers.map(seller => (
+                            <MenuItem key={seller._id} value={seller._id}>{seller.name}</MenuItem>
+                        ))}
+                    </TextField>
+                </Box>
+            )}
 
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
