@@ -1,0 +1,33 @@
+{
+  "name": "tunichain-backend",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "server": "node server.js",
+    "swagger": "node scripts/swagger/swagger_generate_json.js",
+    "clear:db": "node scripts/clearDB.js",
+    "init:db": "node scripts/initDB.js",
+    "reset:db": "npm run clear:db -- -y && npm run init:db",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "ethers": "^5.8.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^6.13.8",
+    "siwe": "^2.3.2"
+  },
+  "devDependencies": {
+    "swagger-autogen": "^2.23.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
