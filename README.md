@@ -15,21 +15,79 @@ This repository contains the solidity smart contracts for the Tunichain project,
 - [Tunichain Smart Contracts](#tunichain-smart-contracts)
   - [Key Features](#key-features)
   - [Contents](#contents)
-  - [Usage and Development](#usage-and-development)
-    - [Prerequisites](#prerequisites)
-    - [Setup](#setup)
-    - [Quick Start (Hardhat Network)](#quick-start-hardhat-network)
-    - [Deployment Script (`deploy-tunichain.js`)](#deployment-script-deploy-tunichainjs)
-  - [Project Structure](#project-structure)
-  - [Testing](#testing)
-    - [Test Suite Features](#test-suite-features)
-    - [Running Tests](#running-tests)
+  - [Architecture](#architecture)
+  - [Project structure](#project-structure)
   - [Smart Contract Details](#smart-contract-details)
     - [Registry](#registry)
     - [InvoiceValidation](#invoicevalidation)
     - [PaymentRegistry](#paymentregistry)
     - [VATControl](#vatcontrol)
+  - [Usage and Development](#usage-and-development)
+    - [Prerequisites](#prerequisites)
+    - [Setup](#setup)
+    - [Quick Start (Hardhat Network)](#quick-start-hardhat-network)
+    - [Deployment Script (`deploy-tunichain.js`)](#deployment-script-deploy-tunichainjs)
+  - [Testing](#testing)
+    - [Test Suite Features](#test-suite-features)
+    - [Running Tests](#running-tests)
   - [Author](#author)
+
+## Architecture
+The project consists of four main smart contracts that work together to manage the Tunichain platform:
+
+1. **Registry** - Manages user roles and access control
+2. **InvoiceValidation** - Handles invoice creation and management
+3. **PaymentRegistry** - Manages payment processing and verification
+4. **VATControl** - Handles VAT calculations and tax-related operations
+
+```mermaid
+flowchart LR  
+    R[Registry] --- I[InvoiceValidation]
+    R --- P[PaymentRegistry]
+    I --- V
+    I --- P
+    P --- V[VATControl]
+```
+
+## Project structure
+
+```
+hardhat/
+├── contracts/                # Smart contracts
+│   ├── Registry.sol          # User and role management
+│   ├── InvoiceValidation.sol # Invoice storage and validation
+│   ├── PaymentRegistry.sol   # Payment receipt management
+│   └── VATControl.sol        # VAT calculation and tracking
+├── test/                     # Test files
+│   └── Tunichain.ts          # Main test suite
+├── scripts/                  # Deployment and utility scripts
+│   └── deploy-tunichain.js   # Main deployment script
+└── ignition/                 # Hardhat Ignition deployment modules
+```
+
+## Smart Contract Details
+
+### Registry
+The Registry contract serves as the central access control mechanism for the Tunichain platform. It:
+- Manages user roles and permissions (sellers, banks, admins)
+- Handles seller and bank registration and approval
+- Controls access to platform features based on user roles
+- Maintains whitelists for approved participants
+
+### InvoiceValidation
+- Stores invoice data with VAT information
+- Emits events for invoice creation
+- Integrates with VATControl for tax calculations
+
+### PaymentRegistry
+- Records payment receipts
+- Matches payments to invoices
+- Triggers VAT calculations on payment
+
+### VATControl
+- Manages VAT rates and calculations
+- Tracks tax base, VAT owed, and VAT paid
+- Provides view functions for tax reporting
 
 ## Usage and Development
 ### Prerequisites
@@ -89,22 +147,6 @@ This helper script automates the deployment and setup process:
 
 > **Note**: This script is designed for Hardhat development environment only and is provided as a convenience for local development and testing.
 
-## Project Structure
-
-```
-hardhat/
-├── contracts/                # Smart contracts
-│   ├── Registry.sol          # User and role management
-│   ├── InvoiceValidation.sol # Invoice storage and validation
-│   ├── PaymentRegistry.sol   # Payment receipt management
-│   └── VATControl.sol        # VAT calculation and tracking
-├── test/                     # Test files
-│   └── Tunichain.ts          # Main test suite
-├── scripts/                  # Deployment and utility scripts
-│   └── deploy-tunichain.js   # Main deployment script
-└── ignition/                 # Hardhat Ignition deployment modules
-```
-
 ## Testing
 
 The project includes a comprehensive test suite that verifies the functionality and performance of the smart contracts. The test suite is written in TypeScript using Hardhat's testing environment.
@@ -139,30 +181,6 @@ npx hardhat test ./test/Tunichain.ts
 ```
 
 The test suite serves as both a verification tool and documentation of the expected behavior of the smart contracts.
-
-## Smart Contract Details
-
-### Registry
-The Registry contract serves as the central access control mechanism for the Tunichain platform. It:
-- Manages user roles and permissions (sellers, banks, admins)
-- Handles seller and bank registration and approval
-- Controls access to platform features based on user roles
-- Maintains whitelists for approved participants
-
-### InvoiceValidation
-- Stores invoice data with VAT information
-- Emits events for invoice creation
-- Integrates with VATControl for tax calculations
-
-### PaymentRegistry
-- Records payment receipts
-- Matches payments to invoices
-- Triggers VAT calculations on payment
-
-### VATControl
-- Manages VAT rates and calculations
-- Tracks tax base, VAT owed, and VAT paid
-- Provides view functions for tax reporting
 
 ## Author
 Developed by [@Ghorbel37](https://github.com/Ghorbel37)
