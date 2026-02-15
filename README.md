@@ -33,7 +33,7 @@ This repository contains the frontend implementation for the Tunichain project, 
   - [Usage and Development](#usage-and-development)
     - [Prerequisites](#prerequisites)
     - [Setup](#setup)
-    - [Deployment:](#deployment)
+    - [Deployment](#deployment)
   - [Author](#author)
 
 
@@ -148,7 +148,7 @@ src/
    VITE_BLOCKCHAIN_CHAIN_ID=31337
    ```
 
-### Deployment:
+### Deployment
 Make sure the Blockchain and Backend are running before deploying the frontend.
 
 1. **Start the development server**
