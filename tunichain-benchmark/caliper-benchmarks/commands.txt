@@ -1,0 +1,11 @@
+*For Hardhat:
+npx hardhat node
+npx hardhat run scripts/deploy-tunichain.js --network localhost
+Update smart contract adresses in networks\hardhat\tunichain-networkconfig.json
+npx caliper launch manager --caliper-workspace . --caliper-networkconfig networks/hardhat/tunichain-networkconfig.json --caliper-benchconfig benchmarks/scenario/tunichain/config.yaml --caliper-flow-skip-install
+
+*For Besu:
+Run besu network
+node src/ethereum/Tunichain/deploy-generic.js
+Update smart contract adresses in networks\besu\quorom\networkconfig.json
+npx caliper launch manager --caliper-workspace . --caliper-networkconfig .\networks\besu\quorom\networkconfig.json --caliper-benchconfig benchmarks/scenario/tunichain/config.yaml --caliper-flow-skip-install
