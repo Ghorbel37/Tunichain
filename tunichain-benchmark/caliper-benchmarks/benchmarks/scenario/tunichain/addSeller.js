@@ -1,0 +1,64 @@
+/*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+'use strict';
+
+const OperationBase = require('./utils/operation-base');
+const TunichainState = require('./utils/tunichain-state');
+
+/**
+ * Workload module for adding sellers to the Registry contract.
+ */
+class AddSeller extends OperationBase {
+
+    /**
+     * Initializes the parameters of the workload.
+     */
+    constructor() {
+        super();
+    }
+
+    /**
+     * Create a TunichainState instance.
+     * @param {number} roundIndex The round index.
+     * @return {TunichainState} The state instance.
+     */
+    createTunichainState(roundIndex) {
+        return new TunichainState(this.workerIndex, roundIndex);
+    }
+
+    /**
+     * Assemble TXs for adding new sellers.
+     */
+    async submitTransaction() {
+        const args = this.tunichainState.getAddSellerArguments();
+        const request = this.createConnectorRequest(
+            'registry',
+            'addSeller',
+            [args.address, args.meta],
+            false
+        );
+        await this.sutAdapter.sendRequests(request);
+    }
+}
+
+/**
+ * Create a new instance of the workload module.
+ * @return {WorkloadModuleInterface}
+ */
+function createWorkloadModule() {
+    return new AddSeller();
+}
+
+module.exports.createWorkloadModule = createWorkloadModule;

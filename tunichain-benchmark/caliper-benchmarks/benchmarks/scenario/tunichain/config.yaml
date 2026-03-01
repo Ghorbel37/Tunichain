@@ -1,0 +1,155 @@
+# Tunichain Benchmark Configuration
+# Benchmarks for 4 smart contract operations: add seller, add bank, submit invoice, store payment
+
+# Shared arguments for tunichain operations
+tunichainArgs: &tunichain-args
+  numberOfSellers: &number-of-sellers 100
+  numberOfBanks: &number-of-banks 50
+  numberOfInvoices: &number-of-invoices 200
+  numberOfPayments: &number-of-payments 100
+
+# Invoice configuration
+invoiceArgs: &invoice-args
+  minAmount: 100000
+  maxAmount: 10000000
+  vatRatePermille: 190
+
+test:
+  name: tunichain
+  description: >-
+    Tunichain benchmark suite testing 4 core smart contract operations:
+    seller registration, bank registration, invoice submission, and payment recording.
+  workers:
+    number: 1
+  rounds:
+    # --- addSeller Rounds ---
+    - label: addSeller-1tps
+      description: Benchmark addSeller at 1 TPS (Latency focus)
+      txNumber: *number-of-sellers
+      rateControl: { type: fixed-rate, opts: { tps: 1 } }
+      workload:
+        module: benchmarks/scenario/tunichain/addSeller.js
+        arguments: *tunichain-args
+
+    - label: addSeller-5tps
+      description: Benchmark addSeller at 5 TPS
+      txNumber: *number-of-sellers
+      rateControl: { type: fixed-rate, opts: { tps: 5 } }
+      workload:
+        module: benchmarks/scenario/tunichain/addSeller.js
+        arguments: *tunichain-args
+
+    - label: addSeller-10tps
+      description: Benchmark addSeller at 10 TPS
+      txNumber: *number-of-sellers
+      rateControl: { type: fixed-rate, opts: { tps: 10 } }
+      workload:
+        module: benchmarks/scenario/tunichain/addSeller.js
+        arguments: *tunichain-args
+
+    - label: addSeller-15tps
+      description: Benchmark addSeller at 15 TPS
+      txNumber: *number-of-sellers
+      rateControl: { type: fixed-rate, opts: { tps: 15 } }
+      workload:
+        module: benchmarks/scenario/tunichain/addSeller.js
+        arguments: *tunichain-args
+
+    # --- addBank Rounds ---
+    - label: addBank-1tps
+      description: Benchmark addBank at 1 TPS (Latency focus)
+      txNumber: *number-of-banks
+      rateControl: { type: fixed-rate, opts: { tps: 1 } }
+      workload:
+        module: benchmarks/scenario/tunichain/addBank.js
+        arguments: *tunichain-args
+
+    - label: addBank-5tps
+      description: Benchmark addBank at 5 TPS
+      txNumber: *number-of-banks
+      rateControl: { type: fixed-rate, opts: { tps: 5 } }
+      workload:
+        module: benchmarks/scenario/tunichain/addBank.js
+        arguments: *tunichain-args
+
+    - label: addBank-10tps
+      description: Benchmark addBank at 10 TPS
+      txNumber: *number-of-banks
+      rateControl: { type: fixed-rate, opts: { tps: 10 } }
+      workload:
+        module: benchmarks/scenario/tunichain/addBank.js
+        arguments: *tunichain-args
+
+    - label: addBank-15tps
+      description: Benchmark addBank at 15 TPS
+      txNumber: *number-of-banks
+      rateControl: { type: fixed-rate, opts: { tps: 15 } }
+      workload:
+        module: benchmarks/scenario/tunichain/addBank.js
+        arguments: *tunichain-args
+
+    # --- submitInvoice Rounds ---
+    - label: submitInvoice-1tps
+      description: Benchmark submitInvoice at 1 TPS (Latency focus)
+      txNumber: *number-of-invoices
+      rateControl: { type: fixed-rate, opts: { tps: 1 } }
+      workload:
+        module: benchmarks/scenario/tunichain/submitInvoice.js
+        arguments: { <<: *tunichain-args, <<: *invoice-args }
+
+    - label: submitInvoice-5tps
+      description: Benchmark submitInvoice at 5 TPS
+      txNumber: *number-of-invoices
+      rateControl: { type: fixed-rate, opts: { tps: 5 } }
+      workload:
+        module: benchmarks/scenario/tunichain/submitInvoice.js
+        arguments: { <<: *tunichain-args, <<: *invoice-args }
+
+    - label: submitInvoice-10tps
+      description: Benchmark submitInvoice at 10 TPS
+      txNumber: *number-of-invoices
+      rateControl: { type: fixed-rate, opts: { tps: 10 } }
+      workload:
+        module: benchmarks/scenario/tunichain/submitInvoice.js
+        arguments: { <<: *tunichain-args, <<: *invoice-args }
+
+    - label: submitInvoice-15tps
+      description: Benchmark submitInvoice at 15 TPS
+      txNumber: *number-of-invoices
+      rateControl: { type: fixed-rate, opts: { tps: 15 } }
+      workload:
+        module: benchmarks/scenario/tunichain/submitInvoice.js
+        arguments: { <<: *tunichain-args, <<: *invoice-args }
+
+    # --- storePayment Rounds ---
+    - label: storePayment-1tps
+      description: Benchmark storePayment at 1 TPS (Latency focus)
+      txNumber: *number-of-payments
+      rateControl: { type: fixed-rate, opts: { tps: 1 } }
+      workload:
+        module: benchmarks/scenario/tunichain/storePayment.js
+        arguments: { <<: *tunichain-args, numberOfInvoices: *number-of-invoices }
+
+    - label: storePayment-5tps
+      description: Benchmark storePayment at 5 TPS
+      txNumber: *number-of-payments
+      rateControl: { type: fixed-rate, opts: { tps: 5 } }
+      workload:
+        module: benchmarks/scenario/tunichain/storePayment.js
+        arguments: { <<: *tunichain-args, numberOfInvoices: *number-of-invoices }
+
+    - label: storePayment-10tps
+      description: Benchmark storePayment at 10 TPS
+      txNumber: *number-of-payments
+      rateControl: { type: fixed-rate, opts: { tps: 10 } }
+      workload:
+        module: benchmarks/scenario/tunichain/storePayment.js
+        arguments: { <<: *tunichain-args, numberOfInvoices: *number-of-invoices }
+
+    - label: storePayment-15tps
+      description: Benchmark storePayment at 15 TPS
+      txNumber: *number-of-payments
+      rateControl: { type: fixed-rate, opts: { tps: 15 } }
+      workload:
+        module: benchmarks/scenario/tunichain/storePayment.js
+        arguments: { <<: *tunichain-args, numberOfInvoices: *number-of-invoices }
