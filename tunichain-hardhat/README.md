@@ -30,7 +30,7 @@ This repository contains the solidity smart contracts for the Tunichain project,
   - [Testing](#testing)
     - [Test Suite Features](#test-suite-features)
     - [Running Tests](#running-tests)
-  - [Author](#author)
+  - [Related Repositories](#related-repositories)
 
 ## Architecture
 The project consists of four main smart contracts that work together to manage the Tunichain platform:
@@ -52,7 +52,7 @@ flowchart LR
 ## Project structure
 
 ```
-hardhat/
+tunichain-hardhat/
 ├── contracts/                # Smart contracts
 │   ├── Registry.sol          # User and role management
 │   ├── InvoiceValidation.sol # Invoice storage and validation
@@ -182,5 +182,12 @@ npx hardhat test ./test/Tunichain.ts
 
 The test suite serves as both a verification tool and documentation of the expected behavior of the smart contracts.
 
-## Author
-Developed by [@Ghorbel37](https://github.com/Ghorbel37)
+## Related Repositories
+
+The smart contracts are part of the [Tunichain](https://github.com/Ghorbel37/Tunichain) project:
+
+- [`tunichain-backend`](../tunichain-backend/) - Off-chain API server
+- [`tunichain-frontend`](../tunichain-frontend/) - Web application
+- [`tunichain-benchmark`](../tunichain-benchmark/) - Benchmarking protocol
+
+Developed by [Ghorbel37](https://github.com/Ghorbel37)

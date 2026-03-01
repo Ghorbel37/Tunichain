@@ -31,7 +31,7 @@ This repository contains the backend services for the Tunichain project, built u
     - [First-Time Setup](#first-time-setup)
     - [Deployment](#deployment)
     - [Available Commands](#available-commands)
-  - [Author](#author)
+  - [Related Repositories](#related-repositories)
 
 
 ## Project Structure
@@ -135,5 +135,12 @@ Make sure the blockchain node and MongoDB are running and accessible before depl
 - `npm run init:db`: Initialize the database with sample data
 - `npm run reset:db`: Reset the database (clear and reinitialize)
 
-## Author
-Developed by [@Ghorbel37](https://github.com/Ghorbel37)
+## Related Repositories
+
+This backend is part of the [Tunichain](https://github.com/Ghorbel37/Tunichain) project:
+
+- [`tunichain-hardhat`](../tunichain-hardhat/) - Smart contracts
+- [`tunichain-frontend`](../tunichain-frontend/) - Web application
+- [`tunichain-benchmark`](../tunichain-benchmark/) - Benchmarking protocol
+
+Developed by [Ghorbel37](https://github.com/Ghorbel37)

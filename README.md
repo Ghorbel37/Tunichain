@@ -79,6 +79,7 @@ flowchart LR
 ```
 tunichain/
 ├── tunichain-backend/     # Backend server
+├── tunichain-benchmark/   # Benchmarking protocol
 ├── tunichain-frontend/    # Frontend application
 └── tunichain-hardhat/     # Smart contracts
 ```
@@ -196,6 +197,7 @@ tunichain/
 - [Smart Contracts Documentation](./tunichain-hardhat/README.md)
 - [Backend Documentation](./tunichain-backend/README.md)
 - [Frontend Documentation](./tunichain-frontend/README.md)
+- [Benchmarking Protocol](./tunichain-benchmark/README.md)
 
 ## Author
-Developed by [@Ghorbel37](https://github.com/Ghorbel37)
+Developed by [Ghorbel37](https://github.com/Ghorbel37)

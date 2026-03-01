@@ -34,7 +34,7 @@ This repository contains the frontend implementation for the Tunichain project, 
     - [Prerequisites](#prerequisites)
     - [Setup](#setup)
     - [Deployment](#deployment)
-  - [Author](#author)
+  - [Related Repositories](#related-repositories)
 
 
 ## User Roles and Access
@@ -159,5 +159,12 @@ Make sure the Blockchain and Backend are running before deploying the frontend.
 2. **Open in browser**
    The application will be available at `http://localhost:5173`
 
-## Author
-Developed by [@Ghorbel37](https://github.com/Ghorbel37)
+## Related Repositories
+
+This frontend is part of the [Tunichain](https://github.com/Ghorbel37/Tunichain) project:
+
+- [`tunichain-hardhat`](../tunichain-hardhat/) - Smart contracts
+- [`tunichain-backend`](../tunichain-backend/) - Off-chain API server
+- [`tunichain-benchmark`](../tunichain-benchmark/) - Benchmarking protocol
+
+Developed by [Ghorbel37](https://github.com/Ghorbel37)
