@@ -31,10 +31,14 @@ export default function InvoiceDetailsModal({
     const [validating, setValidating] = useState(false);
     const [validationError, setValidationError] = useState("");
     const [validationSuccess, setValidationSuccess] = useState("");
+    // Tracks the status locally so buttons hide immediately on click
+    const [committedStatus, setCommittedStatus] = useState(null);
 
     const handleValidation = async (status) => {
         if (!invoice) return;
 
+        // Hide buttons immediately
+        setCommittedStatus(status);
         setValidating(true);
         setValidationError("");
         setValidationSuccess("");
@@ -53,6 +57,8 @@ export default function InvoiceDetailsModal({
                 handleClose();
             }, 1500);
         } catch (err) {
+            // Restore buttons if the request failed
+            setCommittedStatus(null);
             setValidationError(err.message || "Error updating validation status");
         } finally {
             setValidating(false);
@@ -62,6 +68,7 @@ export default function InvoiceDetailsModal({
     const handleClose = () => {
         setValidationError("");
         setValidationSuccess("");
+        setCommittedStatus(null);
         onClose();
     };
 
@@ -79,7 +86,9 @@ export default function InvoiceDetailsModal({
 
     if (!invoice) return null;
 
-    const ttnStatus = getTtnStatusColor(invoice.ttnValidationStatus);
+    // Use local committed status if set, otherwise fall back to the invoice's status
+    const effectiveStatus = committedStatus ?? invoice.ttnValidationStatus;
+    const ttnStatus = getTtnStatusColor(effectiveStatus);
 
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
@@ -193,7 +202,7 @@ export default function InvoiceDetailsModal({
                 </Box>
             </DialogContent>
             <DialogActions>
-                {isTTNUser && invoice.ttnValidationStatus === 'pending' && (
+                {isTTNUser && effectiveStatus === 'pending' && (
                     <>
                         <Button
                             onClick={() => handleValidation('valid')}
