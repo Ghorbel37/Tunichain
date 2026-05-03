@@ -126,9 +126,9 @@ src/
 ## Usage and Development
 ### Prerequisites
 
-- Node.js (20+)
+- Node.js (22+)
 - npm
-- MetaMask or other Web3 wallet extension
+- MetaMask
 
 ### Setup
 

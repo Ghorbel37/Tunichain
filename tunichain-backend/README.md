@@ -68,7 +68,7 @@ tunichain-backend/
 ## Usage and Development
 ### Prerequisites
 
-- Node.js (20+)
+- Node.js (22+)
 - MongoDB (5+)
 - npm
 - Ethereum node (for blockchain integration)

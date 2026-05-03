@@ -30,21 +30,24 @@ A comprehensive platform that brings transparency and efficiency to tax administ
   - **Scalability**: Handles high transaction volumes efficiently
 
 ## Content
-- [Tech Stack](#tech-stack)
-  - [Frontend](#frontend)
-  - [Backend](#backend)
-  - [Blockchain](#blockchain)
-- [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Quick Start](#quick-start)
-- [Hybrid data storage](#hybrid-data-storage)
-  - [On-Chain Data](#on-chain-data)
-  - [Off-Chain Data](#off-chain-data)
-- [Data Linking](#data-linking)
-- [Documentation](#documentation)
-- [Author](#author)
+- [Tunichain - Blockchain-Powered Tax and Trade Network](#tunichain---blockchain-powered-tax-and-trade-network)
+  - [Key Features](#key-features)
+  - [Content](#content)
+  - [Tech Stack](#tech-stack)
+    - [Frontend](#frontend)
+    - [Backend](#backend)
+    - [Blockchain](#blockchain)
+  - [Architecture](#architecture)
+  - [Project Structure](#project-structure)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Quick Start](#quick-start)
+  - [Hybrid data storage](#hybrid-data-storage)
+    - [On-Chain Data](#on-chain-data)
+    - [Off-Chain Data](#off-chain-data)
+  - [Data Linking](#data-linking)
+  - [Documentation](#documentation)
+  - [Author](#author)
 
 ## Tech Stack
 ### Frontend
@@ -86,7 +89,7 @@ tunichain/
 
 ## Getting Started
 ### Prerequisites
-- Node.js 20+
+- Node.js 22+
 - npm
 - [MetaMask](https://metamask.io/download/) with at least 4 pre-funded accounts
 - Ethereum node for on-chain storage
@@ -137,7 +140,7 @@ tunichain/
    # Make sure MongoDB is running before starting the backend
    # Terminal 3: Start backend
    cd tunichain-backend
-   npm run init:db
+   npm run reset:db
    npm start
    
    # Terminal 4: Start frontend

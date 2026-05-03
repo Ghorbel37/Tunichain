@@ -92,7 +92,7 @@ The Registry contract serves as the central access control mechanism for the Tun
 ## Usage and Development
 ### Prerequisites
 
-- Node.js (20+)
+- Node.js (22+)
 - npm
 - Hardhat
 
