@@ -104,4 +104,28 @@ router.get("/seller/:sellerId", authMiddleware, requireRoles(USER_ROLES.TAX_ADMI
     }
 });
 
+// Delete a payment by ID (used to rollback when MetaMask transaction is cancelled)
+// Banks can only delete their own payments; superAdmin can delete any
+router.delete("/:id", authMiddleware, requireRoles(USER_ROLES.BANK, USER_ROLES.SUPER_ADMIN), async (req, res) => {
+    try {
+        const payment = await PaymentProof.findById(req.params.id);
+        if (!payment) {
+            return res.status(404).json({ message: "Payment not found" });
+        }
+
+        // Banks can only delete payments that belong to their own bank account
+        if (req.user.role === USER_ROLES.BANK) {
+            const bank = await Bank.findOne({ address: req.user.address });
+            if (!bank || !payment.bank.equals(bank._id)) {
+                return res.status(403).json({ message: "Forbidden: this payment does not belong to your bank" });
+            }
+        }
+
+        await PaymentProof.findByIdAndDelete(req.params.id);
+        res.json({ message: "Payment deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 export default router;

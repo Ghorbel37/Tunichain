@@ -53,12 +53,15 @@ export default function BankPayments() {
         e.preventDefault();
         setError("");
         setSuccess("");
+
+        let createdPaymentId = null;
+
         try {
             if (!window.ethereum) throw new Error("MetaMask is not installed");
 
             // Backend API call - bank is determined by JWT
             const paymentData = await apiClient.post('/api/payments', form);
-            // console.log("Payment added in backend:", paymentData);
+            createdPaymentId = paymentData._id;
 
             // Resolve hashes and amount from backend response
             let paymentHash = paymentData.paymentHash || paymentData?.blockchain?.paymentHash;
@@ -88,6 +91,8 @@ export default function BankPayments() {
                 throw new Error("Transaction failed on-chain.");
             }
 
+            // Blockchain confirmed - payment is fully committed
+            createdPaymentId = null;
             setSuccess("Payment receipt submitted to blockchain");
 
             // Remove the selected invoice from list and refresh payments
@@ -101,7 +106,29 @@ export default function BankPayments() {
                 documentPath: "",
             });
         } catch (err) {
-            setError(err.message || "Error submitting payment");
+            // Rollback: delete the backend record if the blockchain step failed
+            if (createdPaymentId) {
+                try {
+                    await apiClient.delete(`/api/payments/${createdPaymentId}`);
+                    console.info("Payment rolled back from backend:", createdPaymentId);
+                } catch (rollbackErr) {
+                    console.error("Failed to rollback payment from backend:", rollbackErr);
+                }
+            }
+
+            // Detect MetaMask user cancellation (code 4001 or ACTION_REJECTED)
+            const isUserRejection =
+                err.code === 4001 ||
+                err.code === "ACTION_REJECTED" ||
+                err.message?.toLowerCase().includes("user rejected") ||
+                err.message?.toLowerCase().includes("user denied");
+
+            if (isUserRejection) {
+                setError("Transaction cancelled. No payment was recorded.");
+            } else {
+                setError(err.message || "Error submitting payment");
+            }
+
             console.error("Error submitting payment:", err);
         }
     };

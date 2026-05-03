@@ -63,6 +63,9 @@ export default function SellerInvoices() {
         e.preventDefault();
         setError("");
         setSuccess("");
+
+        let createdInvoiceId = null;
+
         try {
             if (!window.ethereum) throw new Error("MetaMask is not installed");
 
@@ -89,6 +92,7 @@ export default function SellerInvoices() {
                 items: invoiceItems,
                 vatRatePermille: parseInt(form.vatRate, 10)
             });
+            createdInvoiceId = invoiceData._id;
 
             // Blockchain transaction
             const provider = new ethers.providers.Web3Provider(window.ethereum, {
@@ -109,6 +113,8 @@ export default function SellerInvoices() {
                 throw new Error("Transaction failed on-chain.");
             }
 
+            // Blockchain confirmed - invoice is fully committed
+            createdInvoiceId = null;
             setSuccess("Invoice created and submitted to blockchain");
             fetchInvoices();
 
@@ -119,7 +125,29 @@ export default function SellerInvoices() {
                 items: [{ description: "", quantity: 1, price: "" }],
             });
         } catch (err) {
-            setError(err.message || "Error creating invoice");
+            // Rollback: delete the backend record if the blockchain step failed
+            if (createdInvoiceId) {
+                try {
+                    await apiClient.delete(`/api/invoices/${createdInvoiceId}`);
+                    console.info("Invoice rolled back from backend:", createdInvoiceId);
+                } catch (rollbackErr) {
+                    console.error("Failed to rollback invoice from backend:", rollbackErr);
+                }
+            }
+
+            // Detect MetaMask user cancellation (code 4001 or ACTION_REJECTED)
+            const isUserRejection =
+                err.code === 4001 ||
+                err.code === "ACTION_REJECTED" ||
+                err.message?.toLowerCase().includes("user rejected") ||
+                err.message?.toLowerCase().includes("user denied");
+
+            if (isUserRejection) {
+                setError("Transaction cancelled. No invoice was recorded.");
+            } else {
+                setError(err.message || "Error creating invoice");
+            }
+
             console.error("Error submitting invoice:", err);
         }
     };

@@ -179,4 +179,28 @@ router.post(
     }
 );
 
+// Delete an invoice by ID (used to rollback when MetaMask transaction is cancelled)
+// Sellers can only delete their own invoices; superAdmin can delete any
+router.delete("/:id", authMiddleware, requireRoles(USER_ROLES.SELLER, USER_ROLES.SUPER_ADMIN), async (req, res) => {
+    try {
+        const invoice = await Invoice.findById(req.params.id);
+        if (!invoice) {
+            return res.status(404).json({ message: "Invoice not found" });
+        }
+
+        // Sellers can only delete invoices that belong to their own seller account
+        if (req.user.role === USER_ROLES.SELLER) {
+            const seller = await Seller.findOne({ address: req.user.address });
+            if (!seller || !invoice.seller.equals(seller._id)) {
+                return res.status(403).json({ message: "Forbidden: this invoice does not belong to your account" });
+            }
+        }
+
+        await Invoice.findByIdAndDelete(req.params.id);
+        res.json({ message: "Invoice deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 export default router;
