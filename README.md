@@ -126,6 +126,21 @@ tunichain/
    ```
 
 4. Start the development environment:
+   
+  Option A (recommended): start everything with one command from the monorepo root:
+  ```bash
+  npm run dev
+  ```
+
+  This command will:
+  - Start the local Hardhat node
+  - Wait for RPC readiness
+  - Deploy contracts
+  - Reset the backend database
+  - Start backend and frontend together
+  - Open the frontend automatically at `http://localhost:5173`
+
+  Option B (manual): run each service in separate terminals:
    ```bash
    # In separate terminals:
    
