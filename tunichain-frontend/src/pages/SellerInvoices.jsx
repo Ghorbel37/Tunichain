@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography, TextField, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert, MenuItem, Divider, TablePagination, IconButton } from "@mui/material";
+import { Box, Typography, TextField, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert, MenuItem, Divider, TablePagination, IconButton, InputAdornment } from "@mui/material";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { ethers } from "ethers";
 import InvoiceValidationABI from "../abi/InvoiceValidation.json";
@@ -223,7 +223,10 @@ export default function SellerInvoices() {
                                 onChange={e => handleItemChange(idx, 'price', e.target.value)}
                                 required
                                 inputProps={{ min: 0.001, step: 0.001 }}
-                                sx={{ width: 120 }}
+                                InputProps={{
+                                    endAdornment: <InputAdornment position="end">DT</InputAdornment>
+                                }}
+                                sx={{ width: 150 }}
                             />
                             <Button color="error" onClick={() => removeItem(idx)} disabled={form.items.length === 1}>
                                 Remove
@@ -298,19 +301,19 @@ export default function SellerInvoices() {
                                                 borderRadius: 1,
                                                 fontSize: '0.75rem',
                                                 fontWeight: 'bold',
-                                                backgroundColor: 
-                                                    inv.ttnValidationStatus === 'valid' ? 'success.light' : 
-                                                    inv.ttnValidationStatus === 'invalid' ? 'error.light' : 'warning.light',
-                                                color: 
-                                                    inv.ttnValidationStatus === 'valid' ? 'success.dark' : 
-                                                    inv.ttnValidationStatus === 'invalid' ? 'error.dark' : 'warning.dark',
+                                                backgroundColor:
+                                                    inv.ttnValidationStatus === 'valid' ? 'success.light' :
+                                                        inv.ttnValidationStatus === 'invalid' ? 'error.light' : 'warning.light',
+                                                color:
+                                                    inv.ttnValidationStatus === 'valid' ? 'success.dark' :
+                                                        inv.ttnValidationStatus === 'invalid' ? 'error.dark' : 'warning.dark',
                                             }}
                                         >
                                             {inv.ttnValidationStatus?.charAt(0).toUpperCase() + inv.ttnValidationStatus?.slice(1) || 'Pending'}
                                         </Box>
                                     </TableCell>
                                     <TableCell>
-                                        <IconButton 
+                                        <IconButton
                                             onClick={() => {
                                                 setSelectedInvoice(inv);
                                                 setModalOpen(true);
