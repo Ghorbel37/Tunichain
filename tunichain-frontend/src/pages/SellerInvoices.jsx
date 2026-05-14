@@ -104,7 +104,8 @@ export default function SellerInvoices() {
             const contract = new ethers.Contract(INVOICE_VALIDATION_ADDRESS, InvoiceValidationABI.abi, signer);
 
             const invoiceHash = invoiceData.invoiceHash;
-            const totalAmountBN = ethers.BigNumber.from(invoiceData.totalAmount.toString());
+            // Use Math.ceil to guarantee a whole integer, matching exactly what the backend stored
+            const totalAmountBN = ethers.BigNumber.from(String(Math.ceil(invoiceData.totalAmount)));
             const vatRatePermille = parseInt(form.vatRate, 10);
 
             const tx = await contract.submitInvoice(invoiceHash, totalAmountBN, vatRatePermille);

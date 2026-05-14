@@ -46,8 +46,8 @@ invoiceSchema.pre('save', async function(next) {
         this.totalAmount = this.items.reduce((sum, item) => {
             return sum + (item.quantity * item.price);
         }, 0);
-        // Calculate VAT (19% of total amount)
-        this.vatAmount = this.totalAmount * this.vatRatePermille / 1000;
+        // Calculate VAT - ceil to nearest integer (permille is smallest unit)
+        this.vatAmount = Math.ceil(this.totalAmount * this.vatRatePermille / 1000);
         this.totalAmountWithVat = this.totalAmount + this.vatAmount;
     }
     

@@ -66,7 +66,8 @@ export default function BankPayments() {
             // Resolve hashes and amount from backend response
             let paymentHash = paymentData.paymentHash || paymentData?.blockchain?.paymentHash;
             let invoiceHash = (paymentData.invoice && paymentData.invoice.invoiceHash) || paymentData.invoiceHash;
-            const amountPaidBN = ethers.BigNumber.from(String(paymentData.amountPaid));
+            // amountPaid is stored in permille units and must be a whole integer for BigNumber
+            const amountPaidBN = ethers.BigNumber.from(String(Math.ceil(paymentData.amountPaid)));
 
             // Validate hashes
             if (!paymentHash || !ethers.utils.isHexString(paymentHash, 32)) {
