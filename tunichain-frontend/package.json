@@ -2,6 +2,7 @@
   "name": "tunichain-frontend",
   "private": true,
   "version": "1.0.0",
+  "author": "Ghorbel37",
   "type": "module",
   "scripts": {
     "dev": "vite",

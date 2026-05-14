@@ -1,6 +1,7 @@
 {
   "name": "tunichain-hardhat",
   "version": "1.0.0",
+  "author": "Ghorbel37",
   "type": "module",
   "engines": {
     "node": ">=22.0.0"
