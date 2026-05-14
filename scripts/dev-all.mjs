@@ -105,38 +105,6 @@ async function waitForPort(host, port, timeoutMs = 60_000) {
   throw new Error(`Timed out waiting for ${host}:${port}`);
 }
 
-function openBrowser(url) {
-  if (process.env.TUNICHAIN_OPEN_BROWSER === "false") {
-    console.log(`Browser auto-open disabled (TUNICHAIN_OPEN_BROWSER=false). Frontend: ${url}`);
-    return;
-  }
-
-  let command;
-  let args;
-
-  if (process.platform === "win32") {
-    command = "cmd";
-    args = ["/c", "start", "", url];
-  } else if (process.platform === "darwin") {
-    command = "open";
-    args = [url];
-  } else {
-    command = "xdg-open";
-    args = [url];
-  }
-
-  const opener = spawn(command, args, {
-    detached: true,
-    stdio: "ignore"
-  });
-
-  opener.on("error", () => {
-    console.warn(`Could not open browser automatically. Open this URL manually: ${url}`);
-  });
-
-  opener.unref();
-}
-
 function terminateChildren() {
   if (shuttingDown) return;
   shuttingDown = true;
@@ -184,18 +152,6 @@ async function main() {
   console.log("Starting backend and frontend...");
   const backend = spawnManaged("BACKEND", backendDir, "npm", ["start"], "32");
   const frontend = spawnManaged("FRONTEND", frontendDir, "npm", ["run", "dev"], "34");
-
-  const frontendUrl = process.env.TUNICHAIN_FRONTEND_URL || "http://localhost:5173";
-
-  try {
-    const parsed = new URL(frontendUrl);
-    const port = parsed.port ? Number(parsed.port) : parsed.protocol === "https:" ? 443 : 80;
-    await waitForPort(parsed.hostname, port, 120_000);
-    openBrowser(frontendUrl);
-  } catch {
-    console.warn(`Could not confirm frontend readiness for ${frontendUrl}.`);
-    console.warn(`Open it manually if needed: ${frontendUrl}`);
-  }
 
   backend.on("close", (code) => {
     if (!shuttingDown) {
