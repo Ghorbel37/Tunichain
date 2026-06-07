@@ -110,7 +110,7 @@ export default function TaxSellerReport() {
 
         doc.autoTable({
             startY: 45,
-            head: [['Invoice #', 'Client', 'Date', 'VAT %', 'Amount', 'VAT', 'Total', 'Status']],
+            head: [['Invoice #', 'Client', 'Date', 'VAT %', 'Amount (HT)', 'VAT', 'Total (TTC)', 'Status']],
             body: tableData,
             theme: 'grid',
             headStyles: { fillColor: [66, 126, 234] },
@@ -125,11 +125,11 @@ export default function TaxSellerReport() {
 
         doc.setFontSize(11);
         doc.setFont(undefined, 'normal');
-        doc.text(`Tax Base (excl. VAT): ${aggregates.totalAmount}`, 14, finalY + 8);
+        doc.text(`Tax Base (HT): ${aggregates.totalAmount}`, 14, finalY + 8);
         doc.text(`Total VAT Amount: ${aggregates.vatAmount}`, 14, finalY + 15);
 
         doc.setFont(undefined, 'bold');
-        doc.text(`Total Amount (incl. VAT): ${aggregates.totalWithVat}`, 14, finalY + 22);
+        doc.text(`Total Amount (TTC): ${aggregates.totalWithVat}`, 14, finalY + 22);
 
         // Print PDF
         doc.autoPrint();
@@ -196,7 +196,7 @@ export default function TaxSellerReport() {
                         <Grid size={{ xs: 12, md: 4 }}>
                             <Card>
                                 <CardContent>
-                                    <Typography color="text.secondary" gutterBottom>Tax Base (excl. VAT)</Typography>
+                                    <Typography color="text.secondary" gutterBottom>Tax Base (HT)</Typography>
                                     <Typography variant="h5" fontWeight="bold">{aggregates.totalAmount}</Typography>
                                 </CardContent>
                             </Card>
@@ -212,7 +212,7 @@ export default function TaxSellerReport() {
                         <Grid size={{ xs: 12, md: 4 }}>
                             <Card sx={{ bgcolor: 'primary.main', color: 'white' }}>
                                 <CardContent>
-                                    <Typography sx={{ color: 'rgba(255,255,255,0.8)' }} gutterBottom>Total (incl. VAT)</Typography>
+                                    <Typography sx={{ color: 'rgba(255,255,255,0.8)' }} gutterBottom>Total (TTC)</Typography>
                                     <Typography variant="h5" fontWeight="bold">{aggregates.totalWithVat}</Typography>
                                 </CardContent>
                             </Card>
@@ -251,9 +251,9 @@ export default function TaxSellerReport() {
                                         <TableCell>Client Name</TableCell>
                                         <TableCell>Date</TableCell>
                                         <TableCell align="center">VAT Rate</TableCell>
-                                        <TableCell align="right">Amount (excl. VAT)</TableCell>
+                                        <TableCell align="right">Amount (HT)</TableCell>
                                         <TableCell align="right">VAT Amount</TableCell>
-                                        <TableCell align="right">Total (incl. VAT)</TableCell>
+                                        <TableCell align="right">Total (TTC)</TableCell>
                                         <TableCell align="center">Status</TableCell>
                                     </TableRow>
                                 </TableHead>

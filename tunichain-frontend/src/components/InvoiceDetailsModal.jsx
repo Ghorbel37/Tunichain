@@ -151,8 +151,8 @@ export default function InvoiceDetailsModal({
                                 <TableRow>
                                     <TableCell>Description</TableCell>
                                     <TableCell align="center">Quantity</TableCell>
-                                    <TableCell align="right">Price</TableCell>
-                                    <TableCell align="right">Total</TableCell>
+                                    <TableCell align="right">Price (HT)</TableCell>
+                                    <TableCell align="right">Total (HT)</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -171,7 +171,7 @@ export default function InvoiceDetailsModal({
                     <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
                         <Grid container spacing={1}>
                             <Grid size={{ xs: 6 }}>
-                                <Typography variant="body2" color="text.secondary">Subtotal (excl. VAT):</Typography>
+                                <Typography variant="body2" color="text.secondary">Subtotal (HT):</Typography>
                             </Grid>
                             <Grid size={{ xs: 6 }}>
                                 <Typography variant="body2" align="right" fontWeight="medium">
@@ -187,7 +187,7 @@ export default function InvoiceDetailsModal({
                                 </Typography>
                             </Grid>
                             <Grid size={{ xs: 6 }}>
-                                <Typography variant="body1" fontWeight="bold">Total (incl. VAT):</Typography>
+                                <Typography variant="body1" fontWeight="bold">Total (TTC):</Typography>
                             </Grid>
                             <Grid size={{ xs: 6 }}>
                                 <Typography variant="body1" align="right" fontWeight="bold">

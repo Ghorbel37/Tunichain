@@ -80,7 +80,7 @@ export default function TaxPayments() {
                                 <TableCell>Payment Reference</TableCell>
                                 <TableCell>Invoice</TableCell>
                                 <TableCell>Bank</TableCell>
-                                <TableCell>Amount Paid</TableCell>
+                                <TableCell>Amount (TTC)</TableCell>
                                 <TableCell>Paid At</TableCell>
                             </TableRow>
                         </TableHead>

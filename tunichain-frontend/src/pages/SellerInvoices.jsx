@@ -217,7 +217,7 @@ export default function SellerInvoices() {
                                 sx={{ width: 100 }}
                             />
                             <TextField
-                                label="Price (HT)"
+                                label="Unit Price (HT)"
                                 type="number"
                                 value={item.price}
                                 onChange={e => handleItemChange(idx, 'price', e.target.value)}

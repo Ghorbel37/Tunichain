@@ -220,7 +220,7 @@ export default function BankPayments() {
                                 <TableCell>Invoice Number</TableCell>
                                 <TableCell>Seller</TableCell>
                                 <TableCell>Client</TableCell>
-                                <TableCell>Amount Paid</TableCell>
+                                <TableCell>Amount (TTC)</TableCell>
                                 <TableCell>Buyer RIB</TableCell>
                                 <TableCell>Paid At</TableCell>
                             </TableRow>
