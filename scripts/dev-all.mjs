@@ -1,6 +1,6 @@
 import net from "node:net";
 import process from "node:process";
-import { spawn } from "node:child_process";
+import { spawn, execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -10,6 +10,7 @@ const rootDir = path.resolve(__dirname, "..");
 
 const CHILDREN = new Set();
 let shuttingDown = false;
+let titleResetInterval = null;
 
 function prefixFor(name, colorCode) {
   const reset = "\x1b[0m";
@@ -108,6 +109,9 @@ async function waitForPort(host, port, timeoutMs = 60_000) {
 function terminateChildren() {
   if (shuttingDown) return;
   shuttingDown = true;
+  if (titleResetInterval) {
+    clearInterval(titleResetInterval);
+  }
   for (const child of CHILDREN) {
     child.kill("SIGINT");
   }
@@ -125,6 +129,19 @@ process.on("SIGTERM", () => {
 });
 
 async function main() {
+  // Set and maintain window title for Windows
+  const setTitle = () => {
+    try {
+      execSync('title Tunichain Dev Server', { shell: true, stdio: 'ignore' });
+    } catch (e) {
+      // Silently ignore if title command fails on non-Windows systems
+    }
+  };
+
+  setTitle();
+  // Reset title every 500ms to prevent child processes from changing it
+  titleResetInterval = setInterval(setTitle, 500);
+
   const hardhatDir = path.join(rootDir, "tunichain-hardhat");
   const backendDir = path.join(rootDir, "tunichain-backend");
   const frontendDir = path.join(rootDir, "tunichain-frontend");

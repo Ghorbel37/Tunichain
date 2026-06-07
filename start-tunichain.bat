@@ -1,1 +1,4 @@
-powershell -NoExit -Command "npm run dev"
+@echo off
+title Tunichain Dev Server
+powershell -Command "npm run dev"
+exit
