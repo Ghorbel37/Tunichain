@@ -31,7 +31,8 @@ router.post("/", async (req, res) => {
             // Create user with 'bank' role
             user = new User({
                 address: address,
-                role: USER_ROLES.BANK
+                role: USER_ROLES.BANK,
+                username: name
             });
             await user.save();
         }

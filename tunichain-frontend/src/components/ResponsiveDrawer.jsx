@@ -75,13 +75,18 @@ export default function ResponsiveDrawer({ drawerWidth, mobileOpen, onMobileTogg
             {/* <Toolbar /> */}
             {/* <Divider /> */}
             {user && (
-                <Box sx={{ px: 2, py: 1.5, bgcolor: 'action.hover', height: '63px' }}>
+                <Box sx={{ px: 2, py: 1.5, bgcolor: 'action.hover', minHeight: '63px' }}>
                     <Typography variant="caption" color="text.secondary">
                         Logged in as
                     </Typography>
-                    <Typography variant="body2" fontWeight="bold">
-                        {getRoleLabel(user.role)}
+                    <Typography variant="body1" fontWeight="bold">
+                        {user.username || getRoleLabel(user.role)}
                     </Typography>
+                    {user.username && (
+                        <Typography variant="caption" color="text.secondary">
+                            {getRoleLabel(user.role)}
+                        </Typography>
+                    )}
                 </Box>
             )}
             <Divider />

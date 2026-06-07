@@ -101,11 +101,13 @@ export default function Profile() {
                                 border: '3px solid rgba(255,255,255,0.5)',
                             }}
                         >
-                            {profile?.address ? profile.address.slice(2, 4).toUpperCase() : '?'}
+                            {profile?.username || profile?.address
+                                ? profile.username ? profile.username.slice(0, 1).toUpperCase() : profile.address.slice(2, 4).toUpperCase()
+                                : '?'}
                         </Avatar>
                         <Box sx={{ flex: 1, minWidth: 200 }}>
                             <Typography variant="h5" fontWeight="bold" sx={{ mb: 1 }}>
-                                Tunichain Account
+                                {profile?.username}
                             </Typography>
                             <Chip
                                 label={roleInfo.label}

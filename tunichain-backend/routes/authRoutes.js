@@ -107,10 +107,11 @@ router.post("/verify", async (req, res) => {
             return res.status(403).json({ error: "User not registered or inactive" });
         }
 
-        // Create JWT with address and role
+        // Create JWT with address, role, and username
         const payload = {
             address: user.address,
-            role: user.role
+            role: user.role,
+            username: user.username
         };
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "24h" });
 
@@ -121,7 +122,8 @@ router.post("/verify", async (req, res) => {
             token,
             user: {
                 address: user.address,
-                role: user.role
+                role: user.role,
+                username: user.username
             }
         });
     } catch (err) {
@@ -145,6 +147,7 @@ router.get("/me", authMiddleware, async (req, res) => {
         res.json({
             address: user.address,
             role: user.role,
+            username: user.username,
             isActive: user.isActive,
             createdAt: user.createdAt
         });

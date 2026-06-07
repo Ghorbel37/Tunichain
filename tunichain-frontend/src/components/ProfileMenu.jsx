@@ -58,7 +58,7 @@ export default function ProfileMenu() {
         <>
             <IconButton onClick={handleMenu} color="inherit" size="large">
                 <Avatar sx={{ bgcolor: 'secondary.main', width: 36, height: 36 }}>
-                    {user?.address ? user.address.slice(2, 4).toUpperCase() : '?'}
+                    {user?.username ? user.username.slice(0, 1).toUpperCase() : user.address.slice(2, 4).toUpperCase()}
                 </Avatar>
             </IconButton>
             <Menu
@@ -74,7 +74,7 @@ export default function ProfileMenu() {
                 {user && (
                     <MenuItem disabled sx={{ opacity: 1, flexDirection: 'column', alignItems: 'flex-start' }}>
                         <Typography variant="body2" fontWeight="bold">
-                            {truncateAddress(user.address)}
+                            {user.username}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
                             {getRoleDisplay(user.role)}

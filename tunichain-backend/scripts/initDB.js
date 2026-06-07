@@ -50,6 +50,7 @@ const initDB = async () => {
       const newUser = new User({
         address,
         role: userData.role,
+        username: userData.name,
         isActive: true
       });
 

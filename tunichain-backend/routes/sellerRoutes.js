@@ -27,7 +27,8 @@ router.post("/", async (req, res) => {
             // Create user with 'seller' role
             user = new User({
                 address: address,
-                role: USER_ROLES.SELLER
+                role: USER_ROLES.SELLER,
+                username: name
             });
             await user.save();
         }
