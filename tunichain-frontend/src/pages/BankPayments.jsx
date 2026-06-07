@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography, TextField, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert, MenuItem, Divider, TablePagination } from "@mui/material";
+import { Box, Typography, TextField, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert, MenuItem, Divider, TablePagination, IconButton, Tooltip } from "@mui/material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { ethers } from "ethers";
 import PaymentRegistryABI from "../abi/PaymentRegistry.json";
 import { apiClient } from "../utils/apiClient";
+import InvoiceDetailsModal from "../components/InvoiceDetailsModal";
 
 // Read contract address from .env
 const PAYMENT_REGISTRY_ADDRESS = import.meta.env.VITE_PAYMENT_REGISTRY_ADDRESS;
@@ -21,6 +23,8 @@ export default function BankPayments() {
     const [success, setSuccess] = useState("");
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [detailInvoice, setDetailInvoice] = useState(null);
+    const [detailOpen, setDetailOpen] = useState(false);
 
     // Fetch unpaid invoices and bank's payments
     const fetchData = async () => {
@@ -135,121 +139,144 @@ export default function BankPayments() {
     const paginatedPayments = payments.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
     return (
-        <Box sx={{ maxWidth: 1100, mx: "auto", mt: 4, px: 2 }}>
-            <Typography variant="h5" gutterBottom fontWeight="bold">My Payment Receipts</Typography>
+        <>
+            <Box sx={{ maxWidth: 1100, mx: "auto", mt: 4, px: 2 }}>
+                <Typography variant="h5" gutterBottom fontWeight="bold">My Payment Receipts</Typography>
 
-            {/* Payment form */}
-            <Paper sx={{ mb: 3, p: 3 }} elevation={2}>
-                <Typography variant="h6" gutterBottom>Record New Payment</Typography>
-                <Box component="form" onSubmit={handleSubmit}>
-                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
-                        <TextField
-                            select
-                            label="Invoice"
-                            name="invoice"
-                            value={form.invoice}
-                            onChange={handleFormInvoiceChange}
-                            required
-                            sx={{ minWidth: 250 }}
-                            SelectProps={{
-                                renderValue: (selected) => {
-                                    const selectedInvoice = invoices.find(inv => inv._id === selected);
-                                    if (!selectedInvoice) return '';
-                                    return `${selectedInvoice.seller?.name || 'N/A'} → ${selectedInvoice.clientName || 'N/A'} : ${selectedInvoice.totalAmountWithVat ? (selectedInvoice.totalAmountWithVat / 1000).toFixed(3) : '0.000'}`;
-                                }
-                            }}
-                        >
-                            {invoices.length === 0 ? (
-                                <MenuItem disabled>No unpaid invoices available</MenuItem>
-                            ) : (
-                                invoices.map(inv => (
-                                    <MenuItem key={inv._id} value={inv._id}>
-                                        <Box>
-                                            <Box fontWeight="bold">{inv.invoiceNumber}</Box>
-                                            <Box fontSize="0.8rem" color="text.secondary">
-                                                {inv.seller?.name || 'No seller'} → {inv.clientName || 'No client'}
+                {/* Payment form */}
+                <Paper sx={{ mb: 3, p: 3 }} elevation={2}>
+                    <Typography variant="h6" gutterBottom>Record New Payment</Typography>
+                    <Box component="form" onSubmit={handleSubmit}>
+                        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+                            <TextField
+                                select
+                                label="Invoice"
+                                name="invoice"
+                                value={form.invoice}
+                                onChange={handleFormInvoiceChange}
+                                required
+                                sx={{ minWidth: 250 }}
+                                SelectProps={{
+                                    renderValue: (selected) => {
+                                        const selectedInvoice = invoices.find(inv => inv._id === selected);
+                                        if (!selectedInvoice) return '';
+                                        return `${selectedInvoice.seller?.name || 'N/A'} → ${selectedInvoice.clientName || 'N/A'} : ${selectedInvoice.totalAmountWithVat ? (selectedInvoice.totalAmountWithVat / 1000).toFixed(3) : '0.000'}`;
+                                    }
+                                }}
+                            >
+                                {invoices.length === 0 ? (
+                                    <MenuItem disabled>No unpaid invoices available</MenuItem>
+                                ) : (
+                                    invoices.map(inv => (
+                                        <MenuItem key={inv._id} value={inv._id}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 1 }}>
+                                                <Box>
+                                                    <Box fontWeight="bold">{inv.invoiceNumber}</Box>
+                                                    <Box fontSize="0.8rem" color="text.secondary">
+                                                        {inv.seller?.name || 'No seller'} → {inv.clientName || 'No client'}
+                                                    </Box>
+                                                    <Box fontSize="0.8rem">
+                                                        Total (TTC): {inv.totalAmountWithVat ? (inv.totalAmountWithVat / 1000).toFixed(3) : '0.000'}
+                                                    </Box>
+                                                </Box>
+                                                <Tooltip title="View invoice details">
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setDetailInvoice(inv);
+                                                            setDetailOpen(true);
+                                                        }}
+                                                    >
+                                                        <InfoOutlinedIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
                                             </Box>
-                                            <Box fontSize="0.8rem">
-                                                Total: {inv.totalAmountWithVat ? (inv.totalAmountWithVat / 1000).toFixed(3) : '0.000'}
-                                            </Box>
-                                        </Box>
-                                    </MenuItem>
-                                ))
-                            )}
-                        </TextField>
-                        <TextField
-                            label="Payment Reference"
-                            name="paymentReference"
-                            value={form.paymentReference}
-                            onChange={handleFormChange}
-                            required
-                            sx={{ minWidth: 200 }}
-                        />
-                        <TextField
-                            label="RIB"
-                            name="rib"
-                            value={form.rib}
-                            onChange={handleFormChange}
-                            required
-                            sx={{ minWidth: 200 }}
-                        />
+                                        </MenuItem>
+                                    ))
+                                )}
+                            </TextField>
+                            <TextField
+                                label="Payment Reference"
+                                name="paymentReference"
+                                value={form.paymentReference}
+                                onChange={handleFormChange}
+                                required
+                                sx={{ minWidth: 200 }}
+                            />
+                            <TextField
+                                label="RIB"
+                                name="rib"
+                                value={form.rib}
+                                onChange={handleFormChange}
+                                required
+                                sx={{ minWidth: 200 }}
+                            />
+                        </Box>
+
+                        <Button type="submit" variant="contained" color="primary" size="large">
+                            Record Payment
+                        </Button>
+
+                        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+                        {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
                     </Box>
+                </Paper>
 
-                    <Button type="submit" variant="contained" color="primary" size="large">
-                        Record Payment
-                    </Button>
+                <Divider sx={{ mb: 3 }} />
 
-                    {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-                    {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
-                </Box>
-            </Paper>
+                {/* Payments table */}
+                <Typography variant="h6" sx={{ mb: 2 }}>Payment History</Typography>
 
-            <Divider sx={{ mb: 3 }} />
-
-            {/* Payments table */}
-            <Typography variant="h6" sx={{ mb: 2 }}>Payment History</Typography>
-
-            {payments.length === 0 ? (
-                <Alert severity="info">No payments recorded yet.</Alert>
-            ) : (
-                <TableContainer component={Paper}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Payment Reference</TableCell>
-                                <TableCell>Invoice Number</TableCell>
-                                <TableCell>Seller</TableCell>
-                                <TableCell>Client</TableCell>
-                                <TableCell>Amount (TTC)</TableCell>
-                                <TableCell>Buyer RIB</TableCell>
-                                <TableCell>Paid At</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {paginatedPayments.map((pay, idx) => (
-                                <TableRow key={pay._id || idx}>
-                                    <TableCell>{pay.paymentReference}</TableCell>
-                                    <TableCell>{pay.invoice?.invoiceNumber || 'N/A'}</TableCell>
-                                    <TableCell>{pay.invoice?.seller?.name || 'N/A'}</TableCell>
-                                    <TableCell>{pay.invoice?.clientName || 'N/A'}</TableCell>
-                                    <TableCell>{pay.amountPaid ? (pay.amountPaid / 1000).toFixed(3) : '0.000'}</TableCell>
-                                    <TableCell>{pay.rib || 'N/A'}</TableCell>
-                                    <TableCell>{new Date(pay.paidAt).toLocaleString()}</TableCell>
+                {payments.length === 0 ? (
+                    <Alert severity="info">No payments recorded yet.</Alert>
+                ) : (
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Payment Reference</TableCell>
+                                    <TableCell>Invoice Number</TableCell>
+                                    <TableCell>Seller</TableCell>
+                                    <TableCell>Client</TableCell>
+                                    <TableCell>Amount (TTC)</TableCell>
+                                    <TableCell>Buyer RIB</TableCell>
+                                    <TableCell>Paid At</TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                    <TablePagination
-                        component="div"
-                        count={payments.length}
-                        page={page}
-                        onPageChange={(e, newPage) => setPage(newPage)}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={e => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
-                        rowsPerPageOptions={[5, 10, 25, 50]}
-                    />
-                </TableContainer>
-            )}
-        </Box>
+                            </TableHead>
+                            <TableBody>
+                                {paginatedPayments.map((pay, idx) => (
+                                    <TableRow key={pay._id || idx}>
+                                        <TableCell>{pay.paymentReference}</TableCell>
+                                        <TableCell>{pay.invoice?.invoiceNumber || 'N/A'}</TableCell>
+                                        <TableCell>{pay.invoice?.seller?.name || 'N/A'}</TableCell>
+                                        <TableCell>{pay.invoice?.clientName || 'N/A'}</TableCell>
+                                        <TableCell>{pay.amountPaid ? (pay.amountPaid / 1000).toFixed(3) : '0.000'}</TableCell>
+                                        <TableCell>{pay.rib || 'N/A'}</TableCell>
+                                        <TableCell>{new Date(pay.paidAt).toLocaleString()}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                        <TablePagination
+                            component="div"
+                            count={payments.length}
+                            page={page}
+                            onPageChange={(e, newPage) => setPage(newPage)}
+                            rowsPerPage={rowsPerPage}
+                            onRowsPerPageChange={e => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+                            rowsPerPageOptions={[5, 10, 25, 50]}
+                        />
+                    </TableContainer>
+                )}
+            </Box>
+
+            <InvoiceDetailsModal
+                open={detailOpen}
+                onClose={() => setDetailOpen(false)}
+                invoice={detailInvoice}
+                showValidationButtons={false}
+            />
+        </>
     );
 }
