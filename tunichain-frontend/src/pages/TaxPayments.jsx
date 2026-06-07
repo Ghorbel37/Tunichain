@@ -82,7 +82,6 @@ export default function TaxPayments() {
                                 <TableCell>Bank</TableCell>
                                 <TableCell>Amount Paid</TableCell>
                                 <TableCell>Paid At</TableCell>
-                                <TableCell>Document</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -93,7 +92,6 @@ export default function TaxPayments() {
                                     <TableCell>{pay.bank?.name || 'N/A'}</TableCell>
                                     <TableCell>{pay.amountPaid ? (pay.amountPaid / 1000).toFixed(3) : '0.000'}</TableCell>
                                     <TableCell>{pay.paidAt ? new Date(pay.paidAt).toLocaleString() : 'N/A'}</TableCell>
-                                    <TableCell>{pay.documentPath || '-'}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

@@ -16,7 +16,6 @@ export default function BankPayments() {
         invoice: "",
         paymentReference: "",
         rib: "",
-        documentPath: "",
     });
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
@@ -104,7 +103,6 @@ export default function BankPayments() {
                 invoice: "",
                 paymentReference: "",
                 rib: "",
-                documentPath: "",
             });
         } catch (err) {
             // Rollback: delete the backend record if the blockchain step failed
@@ -195,13 +193,6 @@ export default function BankPayments() {
                             required
                             sx={{ minWidth: 200 }}
                         />
-                        <TextField
-                            label="Document Path (Optional)"
-                            name="documentPath"
-                            value={form.documentPath}
-                            onChange={handleFormChange}
-                            sx={{ minWidth: 200 }}
-                        />
                     </Box>
 
                     <Button type="submit" variant="contained" color="primary" size="large">
@@ -232,7 +223,6 @@ export default function BankPayments() {
                                 <TableCell>Amount Paid</TableCell>
                                 <TableCell>Buyer RIB</TableCell>
                                 <TableCell>Paid At</TableCell>
-                                <TableCell>Document</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -245,7 +235,6 @@ export default function BankPayments() {
                                     <TableCell>{pay.amountPaid ? (pay.amountPaid / 1000).toFixed(3) : '0.000'}</TableCell>
                                     <TableCell>{pay.rib || 'N/A'}</TableCell>
                                     <TableCell>{new Date(pay.paidAt).toLocaleString()}</TableCell>
-                                    <TableCell>{pay.documentPath ? '✓' : '✗'}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
