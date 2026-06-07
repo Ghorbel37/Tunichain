@@ -42,6 +42,32 @@ export function AuthProvider({ children }) {
         restoreSession();
     }, []);
 
+    // Listen for MetaMask wallet changes and auto-logout
+    useEffect(() => {
+        if (!window.ethereum) return;
+
+        const handleAccountsChanged = (accounts) => {
+            // accounts is empty when the user disconnects, or contains a new address
+            setUser(prev => {
+                if (!prev) return prev; // already logged out, nothing to do
+                const currentAddress = prev.address?.toLowerCase();
+                const newAddress = accounts[0]?.toLowerCase();
+                if (!newAddress || newAddress !== currentAddress) {
+                    // Wallet disconnected or switched — clear session immediately
+                    localStorage.removeItem(TOKEN_KEY);
+                    setToken(null);
+                    return null;
+                }
+                return prev;
+            });
+        };
+
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
+        return () => {
+            window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        };
+    }, []);
+
     const login = useCallback(async () => {
         setError(null);
         setLoading(true);
