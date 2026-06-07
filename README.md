@@ -131,6 +131,7 @@ tunichain/
   ```bash
   npm run dev
   ```
+*Or just double-click `start-tunichain.bat` on Windows*
 
   This command will:
   - Start the local Hardhat node
@@ -162,7 +163,7 @@ tunichain/
    cd tunichain-frontend
    npm run dev
    ```
-5. [MetaMask](https://metamask.io/download/) Setup for Local Development:
+1. [MetaMask](https://metamask.io/download/) Setup for Local Development:
    - Open MetaMask and create a new network:
      - Network Name: `Hardhat Local`
      - RPC URL: `http://127.0.0.1:8545`
@@ -176,7 +177,7 @@ tunichain/
      - Make sure to at least import 2 other accounts for a seller and a bank
    - These accounts come pre-funded with 10,000 ETH each for testing
 
-6. Access the application at `http://localhost:5173`
+2. Access the application at `http://localhost:5173`
 
 ## Hybrid data storage
 ### On-Chain Data
@@ -212,6 +213,7 @@ tunichain/
 
 ## Documentation
 
+- [Detailed Project Documentation](./docs/PROJECT_DOCUMENTATION.md)
 - [Smart Contracts Documentation](./tunichain-hardhat/README.md)
 - [Backend Documentation](./tunichain-backend/README.md)
 - [Frontend Documentation](./tunichain-frontend/README.md)
